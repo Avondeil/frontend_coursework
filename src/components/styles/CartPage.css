@@ -1,0 +1,218 @@
+.cart-page-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    min-height: calc(100vh - 500px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 15vh auto;
+    max-width: 1200px;
+}
+
+.cart-page-container h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cart-items h3, .cart-items p {
+    color: #333;
+}
+
+/* Стили для отдельного товара в корзине */
+.cart-item {
+    display: flex;
+    gap: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cart-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для изображения товара */
+.cart-item img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+.cart-item-details {
+    flex-grow: 1;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Действия с товаром */
+.cart-item-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Стили для кнопки удаления товара */
+.cart-item-actions button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cart-item-actions button:hover {
+    background-color: #c0392b;
+}
+
+/* Стили для инпута количества товара */
+.cart-item-actions input {
+    width: 50px;
+    height: 20px;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    -webkit-appearance: none;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+/* Убирает стрелки в input */
+.cart-item-actions input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cart-item-actions input:focus {
+    border-color: #4CAF50;
+}
+
+/* Стили для блока с итоговой суммой */
+.cart-summary {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cart-summary h3 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.checkout-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.checkout-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Стили для пустой корзины */
+.cart-empty {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 0;
+    margin-top: 15vh;
+    min-height: calc(100vh - 40vh);
+    font-size: 18px;
+    color: #888;
+}
+
+.cart-empty a {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.cart-empty a:hover {
+    text-decoration: underline;
+}
+
+/* Кнопка уменьшения количества */
+.cart-item-actions .quantity-control button:first-child {
+    background-color: #e74c3c;
+    margin: 5px;
+    width: 30px;
+    color: white;
+}
+
+.cart-item-actions .quantity-control button:first-child:hover {
+    background-color: #c0392b;
+}
+
+/* Кнопка увеличения количества */
+.cart-item-actions .quantity-control button:last-child {
+    background-color: #007bff;
+    margin: 5px;
+    width: 30px;
+    color: white;
+}
+
+.cart-item-actions .quantity-control button:last-child:hover {
+    background-color: #0056b3;
+}
+
+
+@media (max-width: 768px) {
+    .cart-page-container {
+        margin: 10px auto;
+        min-height: calc(100vh - 300px);
+        padding: 10px;
+    }
+
+    .cart-items {
+        gap: 10px;
+    }
+
+    .cart-summary {
+        margin-top: 15px;
+        padding: 15px;
+    }
+
+    .cart-empty {
+        margin-top: 0;
+        padding: 30px 0;
+    }
+
+    .cart-item-actions .quantity-control button:first-child,
+    .cart-item-actions .quantity-control button:last-child {
+        width: 50px;
+    }
+
+}

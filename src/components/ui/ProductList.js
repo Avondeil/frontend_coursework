@@ -1,0 +1,48 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import AddToCartButton from "../ui/AddToCartButton";
+
+const ProductList = ({ products, categoryName }) => {
+    const navigate = useNavigate();
+
+    // Переход на страницу продукта
+    const handleProductClick = (partId) => {
+        navigate(`/product/${partId}`);
+    };
+
+    return (
+        <div className="items-grid">
+            {products.length > 0 ? (
+                products.map((product) => (
+                    <div key={product.partId} className="product-card">
+                        <img
+                            src={product.imageUrl || "https://via.placeholder.com/300"}
+                            alt={product.name || "Товар"}
+                            className="product-image"
+                        />
+                        <div className="product-info">
+                            <h2 className="product-title" onClick={() => handleProductClick(product.partId)}>
+                                {product.name || "Без названия"}
+                            </h2>
+                            <p className="product-type">{categoryName}</p>
+                            <div className="product-bottom">
+                                <span className="product-price">{product.price} ₽</span>
+
+                                {/* Если товар не в наличии, показываем "Нет в наличии" */}
+                                {product.stockQuantity <= 0 ? (
+                                    <span className="out-of-stock">Нет в наличии</span>
+                                ) : (
+                                    <AddToCartButton className="buy-button" product={product} />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p>Нет товаров для отображения</p>
+            )}
+        </div>
+    );
+};
+
+export default ProductList;

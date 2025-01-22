@@ -1,0 +1,95 @@
+.product-category-selection-container {
+    padding: 40px 20px;
+    margin-top: 8vh;
+    text-align: center;
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-category-selection-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Тень для заголовка */
+}
+
+.product-category-selection-sections {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.product-category-selection-section {
+    border-radius: 15px;
+    padding: 30px;
+    width: 28%;
+    background: #ffffff;
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавные анимации */
+}
+
+.product-category-selection-section:hover {
+    transform: translateY(-10px); /* Легкое поднятие блока при наведении */
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2); /* Усиленная тень при наведении */
+}
+
+.product-category-selection-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.product-category-selection-section p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 25px;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+.product-category-selection-button {
+    padding: 12px 25px;
+    font-size: 18px;
+    background-color: #007bff; /* Новый цвет кнопки */
+    color: white;
+    border: none;
+    border-radius: 50px; /* Скругленные углы кнопки */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-category-selection-button:hover {
+    background-color: #0056b3; /* Цвет при наведении */
+    transform: scale(1.05); /* Легкое увеличение кнопки при наведении */
+}
+
+.product-category-selection-button:focus {
+    outline: none; /* Убираем фокусное кольцо */
+}
+
+@media (max-width: 768px) {
+    .product-category-selection-container {
+        margin-top: 0;
+    }
+
+    .product-category-selection-title {
+        font-size: 24px;
+    }
+
+    .product-category-selection-section {
+        width: 100%;
+    }
+
+    .product-category-selection-button {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+}
+
+

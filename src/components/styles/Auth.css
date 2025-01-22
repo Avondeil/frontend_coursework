@@ -1,0 +1,206 @@
+.auth,
+.registration {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: calc(100vh - 280px);
+    margin-top: 10vh;
+    margin-bottom: 8vh;
+}
+
+.auth-form,
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+}
+
+.auth-form label,
+.registration-form label {
+    margin: 5px;
+}
+
+.auth-form .input-wrapper,
+.registration-form .input-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.auth-form .input-wrapper:focus-within,
+.registration-form .input-wrapper:focus-within {
+    border-color: #333;
+    background-color: #fff;
+}
+
+.auth-form .input-wrapper input,
+.registration-form .input-wrapper input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 1em;
+    background: none;
+}
+
+.auth-form .input-wrapper .toggle-password,
+.registration-form .input-wrapper .toggle-password {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #333;
+    padding: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.auth-form .input-wrapper .toggle-password:hover,
+.registration-form .input-wrapper .toggle-password:hover {
+    color: black;
+}
+
+.required {
+    color: red;
+    margin-left: 5px;
+}
+
+.toggle-password {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.auth-options,
+.registration-options {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+.remember-label {
+    margin-left: 5px;
+    color: #333;
+    transition: color 0.2s ease;
+}
+
+.remember-label:hover {
+    color: black;
+    cursor: pointer;
+}
+
+.auth-options a,
+.registration-options a {
+    color: #333333;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.auth-options a:hover,
+.registration-options a:hover {
+    color: black;
+}
+
+.auth-buttons,
+.registration-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.auth-buttons button,
+.registration-buttons button {
+    flex: 1;
+    height: 45px;
+    background: black;
+    border-radius: 5px;
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.auth-buttons button:hover,
+.registration-buttons button:hover {
+    background: #333;
+}
+.registration-checkbox {
+    user-select: none;
+}
+
+.error {
+    color: red;
+    font-size: 1em;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+
+@media (max-width: 768px) {
+    .auth-form,
+    .registration-form {
+        width: 85%;
+    }
+
+    .auth {
+        margin: 20px;
+    }
+
+    .registration {
+        margin-top: 20px;
+        margin-bottom: 20px;
+
+        min-height: 67vh;
+    }
+
+    .auth h1,
+    .registration h1 {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 10px;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-buttons,
+    .registration-buttons {
+        flex-direction: column;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .auth-buttons
+    {
+        height: 100px;
+    }
+    .registration-buttons
+    {
+        height: 50px;
+    }
+
+}

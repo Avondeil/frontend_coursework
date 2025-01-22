@@ -1,0 +1,39 @@
+.notification {
+    position: fixed; /* Фиксируем уведомление */
+    bottom: 20px; /* Расстояние от нижнего края */
+    right: 20px; /* Расстояние от правого края */
+    z-index: 1000; /* Убедимся, что оно поверх других элементов */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    animation: fadeIn 0.3s ease-out; /* Анимация появления */
+    max-width: 300px;
+    word-wrap: break-word; /* Чтобы текст не выходил за пределы блока */
+}
+
+.notification h3, .notification p {
+    color: white;
+}
+
+.notification.success {
+    background-color: #4caf50; /* Зеленый цвет для успеха */
+}
+
+.notification.error {
+    background-color: #f44336; /* Красный цвет для ошибки */
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

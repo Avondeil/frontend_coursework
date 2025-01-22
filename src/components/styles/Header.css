@@ -1,0 +1,83 @@
+.header {
+    background-color: #000;
+    height: 8vh;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 0 16px;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.header-left {
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
+
+.header-right {
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+#buttonMenu {
+    background: url("/public/list.svg") no-repeat center;
+    background-size: contain;
+    width: 25px;
+    height: 25px;
+    border: none;
+    cursor: pointer;
+}
+
+#logo_detal {
+    background: url("/public/logo.png") no-repeat center;
+    background-size: contain;
+    width: 120px;
+    margin-left: 15px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+}
+
+
+#phone_list, #search, #account_auth, #basket {
+    background: url("/public/phone.svg") no-repeat center;
+    background-size: contain;
+    margin-left: 15px;
+    width: clamp(20px, 3vw, 30px);
+    height: clamp(20px, 3vw, 30px);
+    border: none;
+    cursor: pointer;
+}
+
+
+#search {
+    background: url("/public/search-icon.svg") no-repeat center;
+    background-size: contain;
+}
+
+#account_auth {
+    background: url("/public/person-icon.svg") no-repeat center;
+    background-size: contain;
+}
+
+#basket {
+    background: url("/public/basket.svg") no-repeat center;
+    background-size: contain;
+}
+
+@media (max-width: 768px) {
+    .header {
+        position: relative;
+    }
+
+}
