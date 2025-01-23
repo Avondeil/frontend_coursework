@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from "../../config";
 import "../styles/Catalog.css";
 import DropdownFilter from "../ui/DropdownFilter";
 import ProductList from "../ui/ProductList";
@@ -12,6 +12,7 @@ const Catalog = () => {
     const [products, setProducts] = useState([]);
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
+
     const categoryMap = {
         autoboxes: "Автобоксы",
         roof_racks: "Багажники",
@@ -61,7 +62,7 @@ const Catalog = () => {
         fetchParameters();
     }, [category]);
 
-    // Функция для получения фильтрованных продуктов по выбранным фильтрам
+    // Получение фильтрованных продуктов
     const fetchFilteredProducts = async () => {
         try {
             const queryParams = new URLSearchParams(filters).toString();
@@ -78,7 +79,7 @@ const Catalog = () => {
         fetchFilteredProducts();
     }, [filters]);
 
-    // Фильтрация доступных опций фильтров в зависимости от выбранных фильтров
+    // Фильтрация доступных опций
     const filterOptions = (filterKey) => {
         let filtered = products;
         Object.keys(filters).forEach((key) => {
@@ -92,22 +93,22 @@ const Catalog = () => {
 
     // Обработка изменений фильтров
     const handleFilterChange = (filterType, selectedOption) => {
-        setFilters((prev) => {
-            const updatedFilters = { ...prev, [filterType]: selectedOption || null };
-            return updatedFilters;
-        });
+        setFilters((prev) => ({
+            ...prev,
+            [filterType]: selectedOption || null,
+        }));
     };
 
-    // Функция для сброса фильтров
+    // Сброс фильтров
     const resetFilters = () => {
         setFilters({});
     };
 
-    // Генерация фильтров на основе параметров
+    // Генерация фильтров
     const renderFiltersByCategory = () => {
         const params = parameterOptions;
 
-        const createDropdown = (label, key) => (
+        const createDropdown = (label, key, enableRange = false) => (
             <DropdownFilter
                 key={key}
                 label={label}
@@ -115,6 +116,7 @@ const Catalog = () => {
                 selected={filters[key]}
                 onChange={(value) => handleFilterChange(key, value)}
                 getOptionLabel={(opt) => opt} // Предполагается, что опции — строки
+                enableRange={enableRange} // Включение диапазона
             />
         );
 
@@ -123,8 +125,8 @@ const Catalog = () => {
                 return (
                     <>
                         {createDropdown("Размер (мм)", "dimensionsMm")}
-                        {createDropdown("Нагрузочный лимит (кг)", "loadKg")}
-                        {createDropdown("Объем (литры)", "volumeL")}
+                        {createDropdown("Нагрузочный лимит (кг)", "loadKg", true)}
+                        {createDropdown("Объем (литры)", "volumeL", true)}
                         {createDropdown("Система открывания", "openingSystem")}
                         {createDropdown("Цвет", "color")}
                         {createDropdown("Страна производителя", "countryOfOrigin")}
@@ -133,9 +135,9 @@ const Catalog = () => {
             case "roof_racks":
                 return (
                     <>
-                        {createDropdown("Длина (см)", "lengthCm")}
+                        {createDropdown("Длина (см)", "lengthCm", true)}
                         {createDropdown("Материал", "material")}
-                        {createDropdown("Нагрузочный лимит (кг)", "loadKg")}
+                        {createDropdown("Нагрузочный лимит (кг)", "loadKg", true)}
                         {createDropdown("Тип крепления", "mountingType")}
                         {createDropdown("Форма поперечин", "crossbarShape")}
                     </>
@@ -153,6 +155,7 @@ const Catalog = () => {
     };
 
     const navigate = useNavigate();
+
     // Переход на страницу продукта
     const handleProductClick = (partId) => {
         navigate(`/product/${partId}`);
