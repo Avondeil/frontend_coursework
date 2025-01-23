@@ -12,6 +12,7 @@ const Catalog = () => {
     const [products, setProducts] = useState([]);
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [priceRange, setPriceRange] = useState({ priceFrom: "", priceTo: "" });
 
     const categoryMap = {
         autoboxes: "Автобоксы",
@@ -20,7 +21,6 @@ const Catalog = () => {
     };
     const categoryName = categoryMap[category] || "Категория не найдена";
 
-    // Получение параметров для фильтров
     useEffect(() => {
         const fetchParameters = async () => {
             try {
@@ -52,7 +52,7 @@ const Catalog = () => {
                         mountingType: unique("mountingType"),
                         crossbarShape: unique("crossbarShape"),
                     });
-                    setProducts(data); // Сохраняем все продукты
+                    setProducts(data);
                 }
             } catch (error) {
                 console.error("Ошибка загрузки параметров:", error);
@@ -62,24 +62,29 @@ const Catalog = () => {
         fetchParameters();
     }, [category]);
 
-    // Получение фильтрованных продуктов
     const fetchFilteredProducts = async () => {
         try {
             const queryParams = new URLSearchParams(filters).toString();
             const url = `${API_BASE_URL}/Parts/ByCategory/${category}?${queryParams}`;
             const response = await axios.get(url);
-            setFilteredProducts(response.data);
+
+            const filteredByPrice = response.data.filter((product) => {
+                const price = product.price;
+                const from = parseFloat(priceRange.priceFrom) || 0;
+                const to = parseFloat(priceRange.priceTo) || Infinity;
+                return price >= from && price <= to;
+            });
+
+            setFilteredProducts(filteredByPrice);
         } catch (error) {
             console.error("Ошибка загрузки продуктов:", error);
         }
     };
 
-    // Фильтрация продуктов при изменении фильтров
     useEffect(() => {
         fetchFilteredProducts();
-    }, [filters]);
+    }, [filters, priceRange]);
 
-    // Фильтрация доступных опций
     const filterOptions = (filterKey) => {
         let filtered = products;
         Object.keys(filters).forEach((key) => {
@@ -91,7 +96,6 @@ const Catalog = () => {
         return uniqueValues;
     };
 
-    // Обработка изменений фильтров
     const handleFilterChange = (filterType, selectedOption) => {
         setFilters((prev) => ({
             ...prev,
@@ -99,12 +103,21 @@ const Catalog = () => {
         }));
     };
 
-    // Сброс фильтров
-    const resetFilters = () => {
-        setFilters({});
+    const handlePriceChange = (e) => {
+        const { name, value } = e.target;
+        const sanitizedValue = value === "" ? "" : Math.max(0, Number(value)); // Запрещаем отрицательные значения
+        setPriceRange((prev) => ({
+            ...prev,
+            [name]: sanitizedValue,
+        }));
     };
 
-    // Генерация фильтров
+
+    const resetFilters = () => {
+        setFilters({});
+        setPriceRange({ priceFrom: "", priceTo: "" });
+    };
+
     const renderFiltersByCategory = () => {
         const params = parameterOptions;
 
@@ -115,8 +128,8 @@ const Catalog = () => {
                 options={filterOptions(key) || []}
                 selected={filters[key]}
                 onChange={(value) => handleFilterChange(key, value)}
-                getOptionLabel={(opt) => opt} // Предполагается, что опции — строки
-                enableRange={enableRange} // Включение диапазона
+                getOptionLabel={(opt) => opt}
+                enableRange={enableRange}
             />
         );
 
@@ -156,7 +169,8 @@ const Catalog = () => {
 
     const navigate = useNavigate();
 
-    // Переход на страницу продукта
+
+
     const handleProductClick = (partId) => {
         navigate(`/product/${partId}`);
     };
@@ -166,6 +180,27 @@ const Catalog = () => {
             <div className="filters">
                 <label>Фильтры</label>
                 {renderFiltersByCategory()}
+                <div className="price-filter">
+                    <label>Цена</label>
+                    <input
+                        type="number"
+                        name="priceFrom"
+                        value={priceRange.priceFrom}
+                        onChange={handlePriceChange}
+                        placeholder="От"
+                        min="0"
+                        className="dropdown-search"
+                    />
+                    <input
+                        type="number"
+                        name="priceTo"
+                        value={priceRange.priceTo}
+                        onChange={handlePriceChange}
+                        placeholder="До"
+                        min="0"
+                        className="dropdown-search"
+                    />
+                </div>
                 <button className="reset-filters-button" onClick={resetFilters}>
                     Сбросить фильтры
                 </button>

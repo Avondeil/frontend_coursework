@@ -24,8 +24,8 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
         // Фильтрация по диапазону (если диапазон включен)
         if (enableRange) {
             const numericValue = parseFloat(label);
-            const fromValid = !range.from || (numericValue >= parseFloat(range.from));
-            const toValid = !range.to || (numericValue <= parseFloat(range.to));
+            const fromValid = !range.from || numericValue >= parseFloat(range.from);
+            const toValid = !range.to || numericValue <= parseFloat(range.to);
 
             return matchesSearch && fromValid && toValid;
         }
@@ -33,8 +33,10 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
         return matchesSearch;
     });
 
+    // Обработка изменения диапазона с проверкой на отрицательные значения
     const handleRangeChange = (key, value) => {
-        setRange((prev) => ({ ...prev, [key]: value }));
+        const sanitizedValue = value === "" ? "" : Math.max(0, Number(value)); // Замена отрицательных значений на 0
+        setRange((prev) => ({ ...prev, [key]: sanitizedValue }));
     };
 
     return (
@@ -63,14 +65,16 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
                                 placeholder="От"
                                 value={range.from}
                                 onChange={(e) => handleRangeChange("from", e.target.value)}
-                                className="dropdown-range-input"
+                                className="dropdown-search"
+                                min="0"
                             />
                             <input
                                 type="number"
                                 placeholder="До"
                                 value={range.to}
                                 onChange={(e) => handleRangeChange("to", e.target.value)}
-                                className="dropdown-range-input"
+                                className="dropdown-search"
+                                min="0"
                             />
                         </div>
                     )}
