@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, enableRange }) => {
+const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, enableRange, reset }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [range, setRange] = useState({ from: "", to: "" });
@@ -12,6 +12,14 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
         }
         return typeof option === "string" ? option : JSON.stringify(option); // Фоллбэк на строковое значение
     };
+
+    // Сброс значений при изменении пропса reset
+    useEffect(() => {
+        if (reset) {
+            setSearch("");
+            setRange({ from: "", to: "" });
+        }
+    }, [reset]);
 
     // Фильтрация опций по поиску и диапазону
     const filteredOptions = options.filter((opt) => {

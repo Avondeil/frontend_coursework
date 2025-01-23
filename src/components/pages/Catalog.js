@@ -13,6 +13,7 @@ const Catalog = () => {
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [priceRange, setPriceRange] = useState({ priceFrom: "", priceTo: "" });
+    const [resetFiltersTrigger, setResetFiltersTrigger] = useState(false); // Для сброса
 
     const categoryMap = {
         autoboxes: "Автобоксы",
@@ -85,37 +86,10 @@ const Catalog = () => {
         fetchFilteredProducts();
     }, [filters, priceRange]);
 
-    const filterOptions = (filterKey) => {
-        let filtered = products;
-        Object.keys(filters).forEach((key) => {
-            if (filters[key]) {
-                filtered = filtered.filter((product) => product[key]?.toString() === filters[key]?.toString());
-            }
-        });
-        const uniqueValues = [...new Set(filtered.map((product) => product[filterKey]?.toString()).filter(Boolean))].sort();
-        return uniqueValues;
-    };
-
-    const handleFilterChange = (filterType, selectedOption) => {
-        setFilters((prev) => ({
-            ...prev,
-            [filterType]: selectedOption || null,
-        }));
-    };
-
-    const handlePriceChange = (e) => {
-        const { name, value } = e.target;
-        const sanitizedValue = value === "" ? "" : Math.max(0, Number(value)); // Запрещаем отрицательные значения
-        setPriceRange((prev) => ({
-            ...prev,
-            [name]: sanitizedValue,
-        }));
-    };
-
-
     const resetFilters = () => {
         setFilters({});
         setPriceRange({ priceFrom: "", priceTo: "" });
+        setResetFiltersTrigger((prev) => !prev); // Переключение триггера
     };
 
     const renderFiltersByCategory = () => {
@@ -125,11 +99,12 @@ const Catalog = () => {
             <DropdownFilter
                 key={key}
                 label={label}
-                options={filterOptions(key) || []}
+                options={params[key] || []}
                 selected={filters[key]}
-                onChange={(value) => handleFilterChange(key, value)}
+                onChange={(value) => setFilters((prev) => ({ ...prev, [key]: value }))}
                 getOptionLabel={(opt) => opt}
                 enableRange={enableRange}
+                reset={resetFiltersTrigger} // Передаем триггер сброса
             />
         );
 
@@ -169,8 +144,6 @@ const Catalog = () => {
 
     const navigate = useNavigate();
 
-
-
     const handleProductClick = (partId) => {
         navigate(`/product/${partId}`);
     };
@@ -186,28 +159,29 @@ const Catalog = () => {
                         type="number"
                         name="priceFrom"
                         value={priceRange.priceFrom}
-                        onChange={handlePriceChange}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, priceFrom: e.target.value }))}
                         placeholder="От"
-                        min="0"
                         className="dropdown-search"
+                        min="0"
                     />
                     <input
                         type="number"
                         name="priceTo"
                         value={priceRange.priceTo}
-                        onChange={handlePriceChange}
+                        onChange={(e) => setPriceRange((prev) => ({ ...prev, priceTo: e.target.value }))}
                         placeholder="До"
-                        min="0"
                         className="dropdown-search"
+                        min="0"
                     />
                 </div>
                 <button className="reset-filters-button" onClick={resetFilters}>
                     Сбросить фильтры
                 </button>
             </div>
+
             <main className="catalog-items">
-                <h1>Каталог</h1>
-                <ProductList products={filteredProducts} categoryName={categoryName} />
+                <h1>{categoryName}</h1>
+                <ProductList products={filteredProducts} categoryName={categoryName} onProductClick={handleProductClick} />
             </main>
         </div>
     );
