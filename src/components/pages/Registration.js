@@ -15,7 +15,7 @@ const Registration = () => {
     });
 
     const [error, setError] = useState(null);
-    const { showNotification } = useNotification(); // Хук для уведомлений
+    const { showNotification } = useNotification();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -26,50 +26,49 @@ const Registration = () => {
         });
     };
 
-    // Обработчик для проверки телефона
     const handlePhoneChange = (e) => {
-        // Регулярное выражение для разрешения только цифр и знака "+"
-        const regex = /^[+]?[0-9]*$/;
-        const { value } = e.target;
+        const value = e.target.value;
+        const regex = /^\+?[78]?\d{0,10}$/;
 
-        // Если значение соответствует регулярному выражению, обновляем поле
         if (regex.test(value)) {
-            setFormData({
-                ...formData,
-                phone: value,
-            });
+            setFormData({ ...formData, phone: value });
         }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        const nameRegex = /^[A-Za-zА-Яа-яЁё\s]+$/;
+        const phoneRegex = /^\+7\d{10}$|^8\d{10}$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,30}$/;
+
+        if (!formData.fullName || !nameRegex.test(formData.fullName)) {
+            errors.fullName = 'Введите корректное ФИО (только буквы и пробелы)';
+        }
+        if (!formData.email || !emailRegex.test(formData.email)) {
+            errors.email = 'Введите корректный email';
+        }
+        if (!formData.password || !passwordRegex.test(formData.password)) {
+            errors.password = 'Пароль должен содержать хотя бы одну заглавную букву, цифру и быть от 6 до 30 символов';
+        }
+        if (formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = 'Пароли не совпадают';
+        }
+        if (!formData.phone || !phoneRegex.test(formData.phone)) {
+            errors.phone = 'Введите корректный номер телефона (например, +79991234567 или 89001234567)';
+        }
+        if (!formData.agreement) {
+            errors.agreement = 'Необходимо согласие на обработку данных';
+        }
+
+        Object.values(errors).forEach((msg) => showNotification({ type: 'error', message: msg }));
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Сброс ошибок
         setError(null);
-
-        // Простая валидация формы
-        const errors = {};
-
-        if (!formData.fullName) errors.fullName = 'Поле обязательно для заполнения';
-        if (!formData.email) errors.email = 'Поле обязательно для заполнения';
-        if (!formData.password) errors.password = 'Поле обязательно для заполнения';
-        if (!formData.confirmPassword) errors.confirmPassword = 'Поле обязательно для заполнения';
-        if (!formData.phone) errors.phone = 'Поле обязательно для заполнения';
-        if (formData.password !== formData.confirmPassword) errors.passwordMismatch = 'Пароли не совпадают';
-        if (!formData.agreement) errors.agreement = 'Необходимо согласие на обработку данных';
-
-        // Если есть ошибки, показываем их через уведомления
-        if (Object.keys(errors).length > 0) {
-            for (const [key, message] of Object.entries(errors)) {
-                showNotification({
-                    type: 'error',
-                    message: message,
-                });
-            }
-            return;
-        }
-
-        // Отправка данных на сервер через axios
+        if (!validateForm()) return;
         try {
             const response = await axios.post(`${API_BASE_URL}/auth/register`, {
                 fullName: formData.fullName,
@@ -77,31 +76,13 @@ const Registration = () => {
                 password: formData.password,
                 phone: formData.phone,
             });
-
             if (response.status === 200) {
-                // Успешная регистрация
-                showNotification({
-                    type: 'success',
-                    message: 'Успешная регистрация!',
-                });
+                showNotification({ type: 'success', message: 'Успешная регистрация!' });
                 navigate('/auth');
             }
         } catch (err) {
-            if (err.response) {
-                // Ошибка от сервера
-                setError(err.response.data.message || 'Ошибка регистрации');
-                showNotification({
-                    type: 'error',
-                    message: err.response.data.message || 'Ошибка регистрации',
-                });
-            } else {
-                // Ошибка при выполнении запроса
-                setError('Ошибка при выполнении запроса');
-                showNotification({
-                    type: 'error',
-                    message: 'Ошибка при выполнении запроса',
-                });
-            }
+            setError(err.response?.data?.message || 'Ошибка регистрации');
+            showNotification({ type: 'error', message: err.response?.data?.message || 'Ошибка регистрации' });
         }
     };
 
@@ -110,92 +91,34 @@ const Registration = () => {
             <div className="registration">
                 <h1>Регистрация</h1>
                 <form className="registration-form" onSubmit={handleSubmit}>
-                    <label>
-                        Фамилия Имя Отчество (ФИО) <span className="required">*</span>
-                    </label>
+                    <label>ФИО <span className="required">*</span></label>
                     <div className="input-wrapper">
-                        <input
-                            type="text"
-                            name="fullName"
-                            value={formData.fullName}
-                            onChange={handleChange}
-                            maxLength="255"
-                            placeholder="Введите ФИО"
-                            required
-                        />
+                        <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Введите ФИО" required />
                     </div>
 
-                    <label>
-                        E-mail (будет являться логином для входа) <span className="required">*</span>
-                    </label>
+                    <label>Email <span className="required">*</span></label>
                     <div className="input-wrapper">
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            maxLength="30"
-                            placeholder="Введите свой E-mail"
-                            required
-                        />
+                        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Введите email" required />
                     </div>
 
-                    <label>
-                        Пароль <span className="required">*</span>
-                    </label>
+                    <label>Пароль <span className="required">*</span></label>
                     <div className="input-wrapper">
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            minLength="6"
-                            maxLength="30"
-                            placeholder="Введите пароль"
-                            required
-                        />
+                        <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Введите пароль" required />
                     </div>
 
-                    <label>
-                        Подтверждение пароля <span className="required">*</span>
-                    </label>
+                    <label>Подтверждение пароля <span className="required">*</span></label>
                     <div className="input-wrapper">
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            maxLength="30"
-                            placeholder="Повторите пароль"
-                            required
-                        />
+                        <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Повторите пароль" required />
                     </div>
 
-                    <label>
-                        Номер телефона <span className="required">*</span>
-                    </label>
+                    <label>Номер телефона <span className="required">*</span></label>
                     <div className="input-wrapper">
-                        <input
-                            type="text"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handlePhoneChange}  // Используем новый обработчик
-                            minLength="10"
-                            maxLength="11"
-                            placeholder="Введите номер телефона"
-                            required
-                        />
+                        <input type="text" name="phone" value={formData.phone} onChange={handlePhoneChange} placeholder="Введите номер телефона" required />
                     </div>
-                    {error && <div className="error">{error}</div>}
+
                     <div className="registration-options">
                         <div className="registration-checkbox">
-                            <input
-                                type="checkbox"
-                                name="agreement"
-                                checked={formData.agreement}
-                                onChange={handleChange}
-                                id="registration-agreement"
-                            />
+                            <input type="checkbox" name="agreement" checked={formData.agreement} onChange={handleChange} id="registration-agreement" />
                             <label className="registration-label" htmlFor="registration-agreement">
                                 Я согласен на обработку <Link target="_blank" to="https://disk.yandex.ru/i/P_7TNJcXbR8hog">персональных данных</Link>
                             </label>
