@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../../config';
+import { useNotification } from "../contexts/NotificationContext";
 import '../styles/PartForm.css';
 
-const PartForm = ({ partId, onSave }) => {
+const PartForm = ({ partId }) => {
     const [part, setPart] = useState({
         name: '',
         description: '',
@@ -17,7 +19,8 @@ const PartForm = ({ partId, onSave }) => {
         sparePartsParameter: { countryOfOrigin: '', color: '' },
         compatibilities: []
     });
-
+    const { showNotification } = useNotification();
+    const navigate = useNavigate();
     const productTypes = [
         { productTypeId: 1, name: 'Автобоксы' },
         { productTypeId: 2, name: 'Багажники' },
@@ -238,15 +241,24 @@ const PartForm = ({ partId, onSave }) => {
                 sparePartsParameter: part.productTypeId === 3 ? part.sparePartsParameter : null
             };
 
+            let response;
             if (partId) {
                 partData.partId = partId;
-                await axios.put(`${API_BASE_URL}/parts/${partId}`, partData, config);
-                toast.success('Запчасть успешно обновлена');
+                response = await axios.put(`${API_BASE_URL}/parts/${partId}`, partData, config);
+                showNotification({
+                    type: 'success',
+                    message: 'Запчасть успешно обновлена'
+                });
+                navigate(`/product/${partId}`);
             } else {
-                await axios.post(`${API_BASE_URL}/parts`, partData, config);
-                toast.success('Запчасть успешно добавлена');
+                response = await axios.post(`${API_BASE_URL}/parts`, partData, config);
+                const newPartId = response.data.partId; // Assuming the API returns the new partId
+                showNotification({
+                    type: 'success',
+                    message: 'Запчасть успешно добавлена'
+                });
+                navigate(`/product/${newPartId}`);
             }
-            onSave();
         } catch (error) {
             const message = error.response?.data?.message || error.message;
             setError(`Ошибка сохранения: ${message}`);
