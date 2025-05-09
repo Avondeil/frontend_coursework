@@ -20,6 +20,7 @@ import { NotificationProvider } from './components/contexts/NotificationContext'
 import ResetPassword from "./components/pages/ResetPassword";
 import AboutPage from "./components/pages/AboutPage";
 import ScrollToTop from './components/ui/ScrollToTop';
+import PartForm from "./components/pages/PartForm";
 
 function App() {
     return (
@@ -48,6 +49,8 @@ function App() {
                             <Route path="/cart" element={<CartPage />} />
                             <Route path="/autoparts" element={<AutoParts />} />
                             <Route path="/about" element={<AboutPage />} />
+                            <Route path="/partform" element={<PartForm />} />
+                            <Route path="/edit-part/:partId" element={<PartForm />} />
                         </Routes>
                         <Footer />
                     </Router>
