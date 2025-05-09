@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../../config';
 import { useNotification } from "../contexts/NotificationContext";
 import '../styles/PartForm.css';
 
-const PartForm = ({ partId }) => {
+const PartForm = () => {
+    const { partId } = useParams();
     const [part, setPart] = useState({
         name: '',
         description: '',
         price: 0,
-        stockQuantity: 0,
+        stockQuantity: null,
         productTypeId: null,
         imageUrl: '',
         autoboxParameter: { dimensionsMm: '', loadKg: null, volumeL: null, openingSystem: '', countryOfOrigin: '', color: '' },
@@ -31,7 +32,7 @@ const PartForm = ({ partId }) => {
     const [models, setModels] = useState([]);
     const [generations, setGenerations] = useState([]);
     const [bodyTypes, setBodyTypes] = useState([]);
-    const [compatibility, setCompatibility] = useState({ brandId: null, modelId: null, generationId: null, bodytypeid: null });
+    const [compatibility, setCompatibility] = useState({ brandId: null, modelId: null, generationId: null, bodytypeId: null });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -54,21 +55,21 @@ const PartForm = ({ partId }) => {
                         name: partData.name || '',
                         description: partData.description || '',
                         price: partData.price || 0,
-                        stockQuantity: partData.stockQuantity || 0,
-                        productTypeId: partData.productTypeId || null,
+                        stockQuantity: partData.stockQuantity ?? null,
+                        productTypeId: partData.productTypeId ?? null,
                         imageUrl: partData.imageUrl || '',
-                        autoboxParameter: partData.productTypeId === 1 ? partData.autoboxParameter : { dimensionsMm: '', loadKg: null, volumeL: null, openingSystem: '', countryOfOrigin: '', color: '' },
-                        roofRackParameter: partData.productTypeId === 2 ? partData.roofRackParameter : { lengthCm: null, material: '', loadKg: null, mountingType: '', crossbarShape: '', countryOfOrigin: '', color: '' },
-                        sparePartsParameter: partData.productTypeId === 3 ? partData.sparePartsParameter : { countryOfOrigin: '', color: '' },
-                        compatibilities: partData.partsAutos?.map(c => ({
+                        autoboxParameter: partData.autoboxParameter || { dimensionsMm: '', loadKg: null, volumeL: null, openingSystem: '', countryOfOrigin: '', color: '' },
+                        roofRackParameter: partData.roofRackParameter || { lengthCm: null, material: '', loadKg: null, mountingType: '', crossbarShape: '', countryOfOrigin: '', color: '' },
+                        sparePartsParameter: partData.sparePartsParameter || { countryOfOrigin: '', color: '' },
+                        compatibilities: partData.compatibilities?.map(c => ({
                             brandId: c.brandId,
                             modelId: c.modelId,
                             generationId: c.generationId,
-                            bodytypeid: c.bodytypeId,
-                            brandName: brandsRes.data.find(b => b.brandId === c.brandId)?.name || 'Неизвестный бренд',
-                            modelName: 'Неизвестная модель',
-                            generationYear: 'Неизвестное поколение',
-                            bodyTypeName: 'Неизвестный тип кузова'
+                            bodytypeId: c.bodytypeId,
+                            brandName: c.brandName || 'Неизвестный бренд',
+                            modelName: c.modelName || 'Неизвестная модель',
+                            generationYear: c.generationYear || 'Неизвестное поколение',
+                            bodyTypeName: c.bodytypeName || 'Неизвестный тип кузова'
                         })) || []
                     });
                 }
@@ -88,10 +89,11 @@ const PartForm = ({ partId }) => {
             const fetchModels = async () => {
                 try {
                     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                    if (!token) throw new Error('Токен авторизации не найден');
                     const config = { headers: { Authorization: `Bearer ${token}` } };
                     const response = await axios.get(`${API_BASE_URL}/Models/ByBrand/${compatibility.brandId}`, config);
                     setModels(response.data || []);
-                    setCompatibility(prev => ({ ...prev, modelId: null, generationId: null, bodytypeid: null }));
+                    setCompatibility(prev => ({ ...prev, modelId: null, generationId: null, bodytypeId: null }));
                     setGenerations([]);
                     setBodyTypes([]);
                 } catch (error) {
@@ -103,7 +105,7 @@ const PartForm = ({ partId }) => {
             setModels([]);
             setGenerations([]);
             setBodyTypes([]);
-            setCompatibility(prev => ({ ...prev, modelId: null, generationId: null, bodytypeid: null }));
+            setCompatibility(prev => ({ ...prev, modelId: null, generationId: null, bodytypeId: null }));
         }
     }, [compatibility.brandId]);
 
@@ -112,10 +114,11 @@ const PartForm = ({ partId }) => {
             const fetchGenerations = async () => {
                 try {
                     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                    if (!token) throw new Error('Токен авторизации не найден');
                     const config = { headers: { Authorization: `Bearer ${token}` } };
                     const response = await axios.get(`${API_BASE_URL}/Generations/ByModel/${compatibility.modelId}`, config);
                     setGenerations(response.data || []);
-                    setCompatibility(prev => ({ ...prev, generationId: null, bodytypeid: null }));
+                    setCompatibility(prev => ({ ...prev, generationId: null, bodytypeId: null }));
                     setBodyTypes([]);
                 } catch (error) {
                     toast.error(`Ошибка загрузки поколений: ${error.message}`);
@@ -125,7 +128,7 @@ const PartForm = ({ partId }) => {
         } else {
             setGenerations([]);
             setBodyTypes([]);
-            setCompatibility(prev => ({ ...prev, generationId: null, bodytypeid: null }));
+            setCompatibility(prev => ({ ...prev, generationId: null, bodytypeId: null }));
         }
     }, [compatibility.modelId]);
 
@@ -134,10 +137,15 @@ const PartForm = ({ partId }) => {
             const fetchBodyTypes = async () => {
                 try {
                     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                    if (!token) throw new Error('Токен авторизации не найден');
                     const config = { headers: { Authorization: `Bearer ${token}` } };
                     const response = await axios.get(`${API_BASE_URL}/BodyTypes/ByGeneration/${compatibility.generationId}`, config);
-                    setBodyTypes(response.data || []);
-                    setCompatibility(prev => ({ ...prev, bodytypeid: null }));
+                    const bodyTypesData = Array.isArray(response.data) ? response.data.map(bt => ({
+                        bodytypeId: bt.bodytypeid,
+                        name: bt.bodyTypeName
+                    })) : [];
+                    setBodyTypes(bodyTypesData);
+                    setCompatibility(prev => ({ ...prev, bodytypeId: null }));
                 } catch (error) {
                     toast.error(`Ошибка загрузки типов кузова: ${error.message}`);
                 }
@@ -145,7 +153,7 @@ const PartForm = ({ partId }) => {
             fetchBodyTypes();
         } else {
             setBodyTypes([]);
-            setCompatibility(prev => ({ ...prev, bodytypeid: null }));
+            setCompatibility(prev => ({ ...prev, bodytypeId: null }));
         }
     }, [compatibility.generationId]);
 
@@ -172,11 +180,11 @@ const PartForm = ({ partId }) => {
     };
 
     const addCompatibility = () => {
-        if (compatibility.brandId && compatibility.modelId && compatibility.generationId && compatibility.bodytypeid) {
+        if (compatibility.brandId && compatibility.modelId && compatibility.generationId && compatibility.bodytypeId) {
             const brand = brands.find(b => b.brandId === compatibility.brandId);
             const model = models.find(m => m.modelId === compatibility.modelId);
             const generation = generations.find(g => g.generationId === compatibility.generationId);
-            const bodyType = bodyTypes.find(bt => bt.bodytypeid === compatibility.bodytypeid);
+            const bodyType = bodyTypes.find(bt => bt.bodytypeId === compatibility.bodytypeId);
 
             const newCompatibility = {
                 brandId: compatibility.brandId,
@@ -185,15 +193,15 @@ const PartForm = ({ partId }) => {
                 modelName: model?.name || 'Неизвестная модель',
                 generationId: compatibility.generationId,
                 generationYear: generation?.year || 'Неизвестное поколение',
-                bodytypeid: compatibility.bodytypeid,
-                bodyTypeName: bodyType?.bodyTypeName || 'Неизвестный тип кузова'
+                bodytypeId: compatibility.bodytypeId,
+                bodyTypeName: bodyType?.name || 'Неизвестный тип кузова'
             };
 
             setPart(prev => ({
                 ...prev,
                 compatibilities: [...prev.compatibilities, newCompatibility]
             }));
-            setCompatibility({ brandId: null, modelId: null, generationId: null, bodytypeid: null });
+            setCompatibility({ brandId: null, modelId: null, generationId: null, bodytypeId: null });
             setModels([]);
             setGenerations([]);
             setBodyTypes([]);
@@ -234,7 +242,7 @@ const PartForm = ({ partId }) => {
                     brandId: c.brandId,
                     modelId: c.modelId,
                     generationId: c.generationId,
-                    bodytypeId: c.bodytypeid
+                    bodytypeId: c.bodytypeId
                 })),
                 autoboxParameter: part.productTypeId === 1 ? part.autoboxParameter : null,
                 roofRackParameter: part.productTypeId === 2 ? part.roofRackParameter : null,
@@ -252,7 +260,7 @@ const PartForm = ({ partId }) => {
                 navigate(`/product/${partId}`);
             } else {
                 response = await axios.post(`${API_BASE_URL}/parts`, partData, config);
-                const newPartId = response.data.partId; // Assuming the API returns the new partId
+                const newPartId = response.data.partId;
                 showNotification({
                     type: 'success',
                     message: 'Запчасть успешно добавлена'
@@ -277,22 +285,22 @@ const PartForm = ({ partId }) => {
 
             <div className="form-group">
                 <label className="form-label">Название *</label>
-                <input type="text" name="name" value={part.name} onChange={handleChange} className="form-input" required />
+                <input type="text" name="name" value={part.name || ''} onChange={handleChange} className="form-input" required />
             </div>
 
             <div className="form-group">
                 <label className="form-label">Описание</label>
-                <textarea name="description" value={part.description} onChange={handleChange} className="form-textarea" />
+                <textarea name="description" value={part.description || ''} onChange={handleChange} className="form-textarea" />
             </div>
 
             <div className="form-group">
                 <label className="form-label">Цена *</label>
-                <input type="number" name="price" value={part.price} onChange={handleChange} className="form-input" required min="0.01" step="0.01" />
+                <input type="number" name="price" value={part.price || ''} onChange={handleChange} className="form-input" required min="0.01" step="0.01" />
             </div>
 
             <div className="form-group">
                 <label className="form-label">Количество на складе</label>
-                <input type="number" name="stockQuantity" value={part.stockQuantity} onChange={handleChange} className="form-input" min="0" />
+                <input type="number" name="stockQuantity" value={part.stockQuantity || ''} onChange={handleChange} className="form-input" min="0" />
             </div>
 
             <div className="form-group">
@@ -307,14 +315,14 @@ const PartForm = ({ partId }) => {
 
             <div className="form-group">
                 <label className="form-label">URL изображения</label>
-                <input type="text" name="imageUrl" value={part.imageUrl} onChange={handleChange} className="form-input" />
+                <input type="text" name="imageUrl" value={part.imageUrl || ''} onChange={handleChange} className="form-input" />
             </div>
 
             {part.productTypeId === 1 && (
                 <>
                     <div className="form-group">
                         <label className="form-label">Размеры (мм)</label>
-                        <input type="text" name="autoboxParameter.dimensionsMm" value={part.autoboxParameter.dimensionsMm} onChange={handleChange} className="form-input" />
+                        <input type="text" name="autoboxParameter.dimensionsMm" value={part.autoboxParameter.dimensionsMm || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Максимальная нагрузка (кг)</label>
@@ -326,15 +334,15 @@ const PartForm = ({ partId }) => {
                     </div>
                     <div className="form-group">
                         <label className="form-label">Система открывания</label>
-                        <input type="text" name="autoboxParameter.openingSystem" value={part.autoboxParameter.openingSystem} onChange={handleChange} className="form-input" />
+                        <input type="text" name="autoboxParameter.openingSystem" value={part.autoboxParameter.openingSystem || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Страна происхождения</label>
-                        <input type="text" name="autoboxParameter.countryOfOrigin" value={part.autoboxParameter.countryOfOrigin} onChange={handleChange} className="form-input" />
+                        <input type="text" name="autoboxParameter.countryOfOrigin" value={part.autoboxParameter.countryOfOrigin || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Цвет</label>
-                        <input type="text" name="autoboxParameter.color" value={part.autoboxParameter.color} onChange={handleChange} className="form-input" />
+                        <input type="text" name="autoboxParameter.color" value={part.autoboxParameter.color || ''} onChange={handleChange} className="form-input" />
                     </div>
                 </>
             )}
@@ -347,7 +355,7 @@ const PartForm = ({ partId }) => {
                     </div>
                     <div className="form-group">
                         <label className="form-label">Материал</label>
-                        <input type="text" name="roofRackParameter.material" value={part.roofRackParameter.material} onChange={handleChange} className="form-input" />
+                        <input type="text" name="roofRackParameter.material" value={part.roofRackParameter.material || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Максимальная нагрузка (кг)</label>
@@ -355,19 +363,19 @@ const PartForm = ({ partId }) => {
                     </div>
                     <div className="form-group">
                         <label className="form-label">Тип крепления</label>
-                        <input type="text" name="roofRackParameter.mountingType" value={part.roofRackParameter.mountingType} onChange={handleChange} className="form-input" />
+                        <input type="text" name="roofRackParameter.mountingType" value={part.roofRackParameter.mountingType || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Форма поперечин</label>
-                        <input type="text" name="roofRackParameter.crossbarShape" value={part.roofRackParameter.crossbarShape} onChange={handleChange} className="form-input" />
+                        <input type="text" name="roofRackParameter.crossbarShape" value={part.roofRackParameter.crossbarShape || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Страна происхождения</label>
-                        <input type="text" name="roofRackParameter.countryOfOrigin" value={part.roofRackParameter.countryOfOrigin} onChange={handleChange} className="form-input" />
+                        <input type="text" name="roofRackParameter.countryOfOrigin" value={part.roofRackParameter.countryOfOrigin || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Цвет</label>
-                        <input type="text" name="roofRackParameter.color" value={part.roofRackParameter.color} onChange={handleChange} className="form-input" />
+                        <input type="text" name="roofRackParameter.color" value={part.roofRackParameter.color || ''} onChange={handleChange} className="form-input" />
                     </div>
                 </>
             )}
@@ -376,11 +384,11 @@ const PartForm = ({ partId }) => {
                 <>
                     <div className="form-group">
                         <label className="form-label">Страна происхождения</label>
-                        <input type="text" name="sparePartsParameter.countryOfOrigin" value={part.sparePartsParameter.countryOfOrigin} onChange={handleChange} className="form-input" />
+                        <input type="text" name="sparePartsParameter.countryOfOrigin" value={part.sparePartsParameter.countryOfOrigin || ''} onChange={handleChange} className="form-input" />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Цвет</label>
-                        <input type="text" name="sparePartsParameter.color" value={part.sparePartsParameter.color} onChange={handleChange} className="form-input" />
+                        <input type="text" name="sparePartsParameter.color" value={part.sparePartsParameter.color || ''} onChange={handleChange} className="form-input" />
                     </div>
                 </>
             )}
@@ -417,10 +425,10 @@ const PartForm = ({ partId }) => {
                     </div>
                     <div className="form-group">
                         <label className="form-label">Тип кузова</label>
-                        <select name="bodytypeid" value={compatibility.bodytypeid || ''} onChange={handleCompatibilityChange} className="form-select" disabled={!compatibility.generationId || bodyTypes.length === 0}>
+                        <select name="bodytypeId" value={compatibility.bodytypeId || ''} onChange={handleCompatibilityChange} className="form-select" disabled={!compatibility.generationId || bodyTypes.length === 0}>
                             <option value="">Выберите тип кузова</option>
                             {bodyTypes.map(type => (
-                                <option key={type.bodytypeid} value={type.bodytypeid}>{type.bodyTypeName}</option>
+                                <option key={type.bodytypeId} value={type.bodytypeId}>{type.name}</option>
                             ))}
                         </select>
                     </div>
