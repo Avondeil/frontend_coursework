@@ -26,6 +26,8 @@ const AutoParts = () => {
     const [generations, setGenerations] = useState([]);
     const [bodyTypes, setBodyTypes] = useState([]);
     const [parts, setParts] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const categoryMap = {
         all: "Все запчасти",
@@ -35,6 +37,37 @@ const AutoParts = () => {
     };
 
     const categoryName = categoryMap[filters.category] || "Категория не найдена";
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+            if (!token) {
+                setIsAdmin(false);
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (response.data?.statusAdmin) {
+                    setIsAdmin(true);
+                }
+            } catch (err) {
+                console.error("Ошибка при получении данных пользователя:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     // Запрос для получения деталей
     const fetchParts = async () => {
@@ -169,6 +202,8 @@ const AutoParts = () => {
         setFilters({ category: "all", brand: null, model: null, generation: null, bodyType: null });
     };
 
+    if (isLoading) return <div>Загрузка...</div>;
+
     return (
         <div className="catalog-container">
             <aside className="filters">
@@ -229,7 +264,7 @@ const AutoParts = () => {
                 {parts.length === 0 ? (
                     <p>Нет товаров, соответствующих выбранным фильтрам.</p>
                 ) : (
-                    <ProductList products={parts} />
+                    <ProductList products={parts} isAdmin={isAdmin} />
                 )}
             </main>
         </div>
