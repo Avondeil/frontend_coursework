@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config';
-import { useParams } from 'react-router-dom';
 import '../styles/ProductPage.css';
 import AddToCartButton from "../ui/AddToCartButton";
 
@@ -13,7 +12,37 @@ const ProductPage = () => {
     const [productType, setProductType] = useState(""); // Переменная для хранения типа товара
     const [detailsError, setDetailsError] = useState(false); // Ошибка для характеристик
     const [productError, setProductError] = useState(false); // Ошибка для отсутствующего товара
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            if (!token) {
+                setIsAdmin(false);
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const response = await axios.get(`${API_BASE_URL}/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                if (response.data?.statusAdmin) {
+                    setIsAdmin(true);
+                }
+            } catch (err) {
+                setIsAdmin(false);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     useEffect(() => {
         // Функция для получения характеристик товара в зависимости от типа
@@ -58,16 +87,16 @@ const ProductPage = () => {
             });
     }, [partId]);
 
-    if (productError) {
-        return <div className="error-container">Товар не существует или был удален.</div>;
-    }
-
-    if (!product) {
-        return <div className="error-container">Загрузка...</div>;
-    }
+    if (isLoading) return <div className="error-container">Загрузка...</div>;
+    if (productError) return <div className="error-container">Товар не существует или был удален.</div>;
+    if (!product) return <div className="error-container">Загрузка...</div>;
 
     const goBack = () => {
         navigate(-1);
+    };
+
+    const handleEditClick = () => {
+        navigate(`/edit-part/${partId}`);
     };
 
     return (
@@ -134,7 +163,13 @@ const ProductPage = () => {
 
             <div className="action-buttons">
                 {product.stockQuantity > 0 ? (
-                    <AddToCartButton product={product} className="buy-button"/>
+                    isAdmin ? (
+                        <button className="buy-button" onClick={handleEditClick}>
+                            Редактировать
+                        </button>
+                    ) : (
+                        <AddToCartButton product={product} className="buy-button" />
+                    )
                 ) : (
                     <p className="out-of-stock">Нет в наличии</p>
                 )}
