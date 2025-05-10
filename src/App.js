@@ -49,7 +49,7 @@ function App() {
                             <Route path="/cart" element={<CartPage />} />
                             <Route path="/autoparts" element={<AutoParts />} />
                             <Route path="/about" element={<AboutPage />} />
-                            <Route path="/partform" element={<PartForm />} />
+                            <Route path="/add-part" element={<PartForm />} />
                             <Route path="/edit-part/:partId" element={<PartForm />} />
                         </Routes>
                         <Footer />
