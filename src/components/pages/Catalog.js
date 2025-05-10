@@ -13,7 +13,10 @@ const Catalog = () => {
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [priceRange, setPriceRange] = useState({ priceFrom: "", priceTo: "" });
-    const [resetFiltersTrigger, setResetFiltersTrigger] = useState(false); // Для сброса
+    const [resetFiltersTrigger, setResetFiltersTrigger] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const categoryMap = {
         autoboxes: "Автобоксы",
@@ -21,6 +24,49 @@ const Catalog = () => {
         parts_accessories: "Запчасти и аксессуары",
     };
     const categoryName = categoryMap[category] || "Категория не найдена";
+
+    // Получаем данные о пользователе и проверяем его статус (админ или нет)
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+            if (!token) {
+                setIsAdmin(false); // Нет токена — не админ
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                // Если полученные данные содержат статус администратора, проверяем его
+                if (response.data?.statusAdmin) {
+                    setIsAdmin(true);
+                }
+            } catch (err) {
+                if (err.response) {
+                    if (err.response.status === 401) {
+                        setError("Ошибка 401: Неавторизован. Проверьте токен.");
+                    } else if (err.response.status === 404) {
+                        setError("Ошибка 404: Пользователь не найден.");
+                    } else {
+                        setError(`Ошибка сервера: ${err.response.statusText}`);
+                    }
+                } else {
+                    setError(`Ошибка при выполнении запроса: ${err.message}`);
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     useEffect(() => {
         const fetchParameters = async () => {
@@ -57,6 +103,7 @@ const Catalog = () => {
                 }
             } catch (error) {
                 console.error("Ошибка загрузки параметров:", error);
+                setError("Ошибка загрузки параметров");
             }
         };
 
@@ -79,6 +126,7 @@ const Catalog = () => {
             setFilteredProducts(filteredByPrice);
         } catch (error) {
             console.error("Ошибка загрузки продуктов:", error);
+            setError("Ошибка загрузки продуктов");
         }
     };
 
@@ -89,7 +137,7 @@ const Catalog = () => {
     const resetFilters = () => {
         setFilters({});
         setPriceRange({ priceFrom: "", priceTo: "" });
-        setResetFiltersTrigger((prev) => !prev); // Переключение триггера
+        setResetFiltersTrigger((prev) => !prev);
     };
 
     const renderFiltersByCategory = () => {
@@ -104,7 +152,7 @@ const Catalog = () => {
                 onChange={(value) => setFilters((prev) => ({ ...prev, [key]: value }))}
                 getOptionLabel={(opt) => opt}
                 enableRange={enableRange}
-                reset={resetFiltersTrigger} // Передаем триггер сброса
+                reset={resetFiltersTrigger}
             />
         );
 
@@ -148,6 +196,9 @@ const Catalog = () => {
         navigate(`/product/${partId}`);
     };
 
+    if (isLoading) return <div>Загрузка...</div>;
+    if (error) return <div className="error">{error}</div>;
+
     return (
         <div className="catalog-container">
             <div className="filters">
@@ -181,7 +232,12 @@ const Catalog = () => {
 
             <main className="catalog-items">
                 <h1>{categoryName}</h1>
-                <ProductList products={filteredProducts} categoryName={categoryName} onProductClick={handleProductClick} />
+                <ProductList
+                    products={filteredProducts}
+                    categoryName={categoryName}
+                    onProductClick={handleProductClick}
+                    isAdmin={isAdmin}
+                />
             </main>
         </div>
     );

@@ -2,12 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../ui/AddToCartButton";
 
-const ProductList = ({ products, categoryName }) => {
+const ProductList = ({ products, categoryName, isAdmin }) => {
     const navigate = useNavigate();
 
     // Переход на страницу продукта
     const handleProductClick = (partId) => {
         navigate(`/product/${partId}`);
+    };
+
+    // Переход на страницу редактирования
+    const handleEditClick = (partId) => {
+        navigate(`/edit-part/${partId}`);
     };
 
     return (
@@ -31,6 +36,13 @@ const ProductList = ({ products, categoryName }) => {
                                 {/* Если товар не в наличии, показываем "Нет в наличии" */}
                                 {product.stockQuantity <= 0 ? (
                                     <span className="out-of-stock">Нет в наличии</span>
+                                ) : isAdmin ? (
+                                    <button
+                                        className="buy-button"
+                                        onClick={() => handleEditClick(product.partId)}
+                                    >
+                                        Редактировать
+                                    </button>
                                 ) : (
                                     <AddToCartButton className="buy-button" product={product} />
                                 )}
