@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config';
@@ -99,6 +99,9 @@ const ProductPage = () => {
         navigate(`/edit-part/${partId}`);
     };
 
+    // Определяем текст наличия
+    const stockText = product.stockQuantity > 0 ? `В наличии: ${product.stockQuantity} шт.` : "Нет в наличии";
+
     return (
         <div className="product-page-container">
             <div className="product-header">
@@ -112,7 +115,7 @@ const ProductPage = () => {
                     <p className="product-description">{productType}</p> {/* Отображаем тип товара */}
                     <div className="product-price-stock">
                         <p className="product-price">Цена: {product.price} руб.</p>
-                        <p className="product-stock">В наличии: {product.stockQuantity} шт.</p>
+                        <p className="product-stock">{stockText}</p>
                     </div>
                 </div>
             </div>
@@ -162,14 +165,12 @@ const ProductPage = () => {
             </div>
 
             <div className="action-buttons">
-                {product.stockQuantity > 0 ? (
-                    isAdmin ? (
-                        <button className="buy-button" onClick={handleEditClick}>
-                            Редактировать
-                        </button>
-                    ) : (
-                        <AddToCartButton product={product} className="buy-button" />
-                    )
+                {isAdmin ? (
+                    <button className="buy-button" onClick={handleEditClick}>
+                        Редактировать
+                    </button>
+                ) : product.stockQuantity > 0 ? (
+                    <AddToCartButton product={product} className="buy-button" />
                 ) : (
                     <p className="out-of-stock">Нет в наличии</p>
                 )}
