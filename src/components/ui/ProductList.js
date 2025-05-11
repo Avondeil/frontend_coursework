@@ -30,6 +30,7 @@ const ProductList = ({ products, categoryName, isAdmin }) => {
                                 {product.name || "Без названия"}
                             </h2>
                             <p className="product-type">{categoryName}</p>
+
                             <div className="product-bottom">
                                 <span className="product-price">{product.price} ₽</span>
 
