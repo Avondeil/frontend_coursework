@@ -40,23 +40,23 @@ const ProductList = ({ products, categoryName, isAdmin }) => {
                                                 : "Неизвестная категория"
                                 )}
                             </p>
-
                             <div className="product-bottom">
                                 <span className="product-price">{product.price} ₽</span>
-
-                                {/* Если товар не в наличии, показываем "Нет в наличии" */}
-                                {product.stockQuantity <= 0 ? (
-                                    <span className="out-of-stock">Нет в наличии</span>
-                                ) : isAdmin ? (
-                                    <button
-                                        className="buy-button"
-                                        onClick={() => handleEditClick(product.partId)}
-                                    >
-                                        Редактировать
-                                    </button>
-                                ) : (
-                                    <AddToCartButton className="buy-button" product={product} />
-                                )}
+                                <div className="product-actions">
+                                    {product.stockQuantity <= 0 && (
+                                        <span className="out-of-stock">Нет в наличии</span>
+                                    )}
+                                    {isAdmin ? (
+                                        <button
+                                            className="buy-button"
+                                            onClick={() => handleEditClick(product.partId)}
+                                        >
+                                            Редактировать
+                                        </button>
+                                    ) : product.stockQuantity > 0 ? (
+                                        <AddToCartButton className="buy-button" product={product} />
+                                    ) : null}
+                                </div>
                             </div>
                         </div>
                     </div>
