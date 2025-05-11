@@ -281,6 +281,16 @@
     margin-left: 0;
 }
 
+.product-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.items-grid .product-actions .out-of-stock {
+    margin-left: 0;
+}
+
 @media (max-width: 768px) {
     .catalog-container {
         display: flex;
@@ -289,6 +299,11 @@
         align-items: center;
         margin-top: 0;
         padding: 10px;
+    }
+
+    .product-actions {
+        flex-direction: column;
+        align-items: center;
     }
 
     .filters {
