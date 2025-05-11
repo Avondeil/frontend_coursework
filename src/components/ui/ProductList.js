@@ -29,7 +29,17 @@ const ProductList = ({ products, categoryName, isAdmin }) => {
                             <h2 className="product-title" onClick={() => handleProductClick(product.partId)}>
                                 {product.name || "Без названия"}
                             </h2>
-                            <p className="product-type">{categoryName}</p>
+                            <p className="product-type">
+                                {categoryName || (
+                                    product.productTypeId === 1
+                                        ? "Автобоксы"
+                                        : product.productTypeId === 2
+                                            ? "Багажники"
+                                            : product.productTypeId === 3
+                                                ? "Запчасти и аксессуары"
+                                                : "Неизвестная категория"
+                                )}
+                            </p>
 
                             <div className="product-bottom">
                                 <span className="product-price">{product.price} ₽</span>
