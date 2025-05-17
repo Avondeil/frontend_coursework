@@ -8,7 +8,14 @@ const ComparePage = () => {
     const [comparisonItems, setComparisonItems] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const navigate = useNavigate();
+
+    const categories = [
+        { id: 2, name: "Багажники" },
+        { id: 1, name: "Автобоксы" },
+        { id: 3, name: "Запчасти и аксессуары" },
+    ];
 
     useEffect(() => {
         const storedItems = JSON.parse(localStorage.getItem("comparisonItems")) || [];
@@ -17,12 +24,27 @@ const ComparePage = () => {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            if (comparisonItems.length === 0) return;
+            if (comparisonItems.length === 0) {
+                setLoading(false);
+                return;
+            }
             try {
                 const responses = await Promise.all(
                     comparisonItems.map((id) => axios.get(`${API_BASE_URL}/Parts/${id}`))
                 );
-                setProducts(responses.map((res) => res.data));
+                const fetchedProducts = responses.map((res) => res.data);
+                setProducts(fetchedProducts);
+
+                // Автоматический выбор категории
+                const categoryCounts = categories.map((cat) => ({
+                    id: cat.id,
+                    count: fetchedProducts.filter((p) => p.productTypeId === cat.id).length,
+                }));
+                const firstWithItems = categoryCounts.find((cat) => cat.count > 0);
+                setSelectedCategory(
+                    firstWithItems ? firstWithItems.id : categories[0].id
+                );
+
                 setLoading(false);
             } catch (error) {
                 console.error("Ошибка загрузки товаров:", error);
@@ -39,8 +61,11 @@ const ComparePage = () => {
     };
 
     const clearComparison = () => {
-        setComparisonItems([]);
-        localStorage.removeItem("comparisonItems");
+        const updatedItems = comparisonItems.filter(
+            (id) => products.find((p) => p.partId === id).productTypeId !== selectedCategory
+        );
+        setComparisonItems(updatedItems);
+        localStorage.setItem("comparisonItems", JSON.stringify(updatedItems));
     };
 
     // Функция для извлечения всех характеристик, включая вложенные
@@ -78,9 +103,11 @@ const ComparePage = () => {
         if (value === null || value === undefined) return "-";
         if (typeof value === "object") {
             if (Array.isArray(value)) {
-                return value.map((item) => {
-                    return `${item.brandName || ""} ${item.modelName || ""} ${item.generationYear || ""} ${item.bodytypeName || ""}`.trim();
-                }).join(", ");
+                return value
+                    .map((item) => {
+                        return `${item.brandName || ""} ${item.modelName || ""} ${item.generationYear || ""} ${item.bodytypeName || ""}`.trim();
+                    })
+                    .join(", ");
             }
             return Object.entries(value)
                 .map(([key, val]) => `${key}: ${val}`)
@@ -125,86 +152,99 @@ const ComparePage = () => {
 
     if (loading) return <div className="compare-page"><h1>Загрузка...</h1></div>;
 
-    if (products.length === 0) {
-        return (
-            <div className="compare-page">
-                <h1>Сравнение товаров</h1>
-                <div className="empty-comparison">
-                    <p>Выберите товары в каталоге для сравнения</p>
-                    <button className="catalog-button" onClick={() => navigate("/catalog")}>
-                        Перейти в каталог
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Получаем все характеристики для каждого товара
-    const allCharacteristics = products.map(getAllCharacteristics);
-
-    // Находим общие характеристики для всех товаров
-    const commonCharacteristics = Object.keys(allCharacteristics[0]).filter((key) =>
-        allCharacteristics.every((char) => char.hasOwnProperty(key))
-    );
+    // Фильтрация товаров по выбранной категории
+    const filteredProducts = products.filter((p) => p.productTypeId === selectedCategory);
 
     return (
         <div className="compare-page">
             <h1>Сравнение товаров</h1>
-            <div className="compare-mini-cards">
-                {products.map((product) => (
-                    <div key={product.partId} className="mini-card">
-                        <img
-                            src={product.imageUrl || "https://via.placeholder.com/140"}
-                            alt={product.name}
-                        />
-                        <h3>{product.name}</h3>
-                        <button onClick={() => handleRemove(product.partId)}>
-                            Удалить
-                        </button>
-                    </div>
+            <div className="category-tabs">
+                {categories.map((category) => (
+                    <button
+                        key={category.id}
+                        className={`category-tab ${selectedCategory === category.id ? "active" : ""}`}
+                        onClick={() => setSelectedCategory(category.id)}
+                    >
+                        {category.name}
+                    </button>
                 ))}
             </div>
-            <table className="compare-table">
-                <thead>
-                <tr>
-                    <th>Характеристика</th>
-                    {products.map((product) => (
-                        <th key={product.partId}>{product.name}</th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {commonCharacteristics.map((char) => (
-                    <tr key={char}>
-                        <td>{charTranslations[char] || char}</td>
-                        {allCharacteristics.map((characteristics, index) => {
-                            const value = characteristics[char];
-                            let isBest = false;
-                            let isWorst = false;
-
-                            if (isNumericCharacteristic(char, allCharacteristics)) {
-                                const parsedValue = typeof value === "string" ? parseFloat(value) : value;
-                                const values = allCharacteristics.map(c => typeof c[char] === "string" ? parseFloat(c[char]) : c[char]);
-                                isBest = parsedValue === Math.max(...values);
-                                isWorst = parsedValue === Math.min(...values);
-                            }
-
-                            return (
-                                <td
-                                    key={index}
-                                    className={isBest ? "best" : isWorst ? "worst" : ""}
-                                >
-                                    {formatCharacteristic(value)}
-                                </td>
+            {filteredProducts.length === 0 ? (
+                <div className="empty-comparison">
+                    <p>Нет товаров для сравнения</p>
+                    <button className="catalog-button" onClick={() => navigate("/catalog")}>
+                        Перейти в каталог
+                    </button>
+                </div>
+            ) : (
+                <>
+                    <div className="compare-mini-cards">
+                        {filteredProducts.map((product) => (
+                            <div key={product.partId} className="mini-card">
+                                <img
+                                    src={product.imageUrl || "https://via.placeholder.com/140"}
+                                    alt={product.name}
+                                />
+                                <h3>{product.name}</h3>
+                                <button onClick={() => handleRemove(product.partId)}>
+                                    Удалить
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <table className="compare-table">
+                        <thead>
+                        <tr>
+                            <th>Характеристика</th>
+                            {filteredProducts.map((product) => (
+                                <th key={product.partId}>{product.name}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {(() => {
+                            const allCharacteristics = filteredProducts.map(getAllCharacteristics);
+                            const commonCharacteristics = Object.keys(allCharacteristics[0] || {}).filter((key) =>
+                                allCharacteristics.every((char) => char.hasOwnProperty(key))
                             );
-                        })}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <button className="clear-button" onClick={clearComparison}>
-                Очистить сравнение
-            </button>
+
+                            return commonCharacteristics.map((char) => (
+                                <tr key={char}>
+                                    <td>{charTranslations[char] || char}</td>
+                                    {allCharacteristics.map((characteristics, index) => {
+                                        const value = characteristics[char];
+                                        let isBest = false;
+                                        let isWorst = false;
+
+                                        if (isNumericCharacteristic(char, allCharacteristics)) {
+                                            const parsedValue =
+                                                typeof value === "string" ? parseFloat(value) : value;
+                                            const values = allCharacteristics.map((c) =>
+                                                typeof c[char] === "string" ? parseFloat(c[char]) : c[char]
+                                            );
+                                            isBest = parsedValue === Math.max(...values);
+                                            isWorst = parsedValue === Math.min(...values);
+                                        }
+
+                                        return (
+                                            <td
+                                                key={index}
+                                                className={isBest ? "best" : isWorst ? "worst" : ""}
+                                            >
+                                                {formatCharacteristic(value)}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ));
+                        })()}
+                        </tbody>
+                    </table>
+                    <button className="clear-button" onClick={clearComparison}>
+                        Очистить сравнение
+                    </button>
+                </>
+            )}
         </div>
     );
 };

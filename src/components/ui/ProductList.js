@@ -19,15 +19,6 @@ const ProductList = ({ products, categoryName, isAdmin }) => {
 
     // Обработка изменения состояния чекбокса
     const handleComparisonChange = (partId, checked) => {
-        const product = products.find((p) => p.partId === partId);
-        const categoryMatch = comparisonItems.length === 0 ||
-            products.find((p) => p.partId === comparisonItems[0]).productTypeId === product.productTypeId;
-
-        if (!categoryMatch) {
-            alert("Можно сравнивать только товары из одной категории!");
-            return;
-        }
-
         if (checked) {
             setComparisonItems((prev) => [...prev, partId]);
         } else {
