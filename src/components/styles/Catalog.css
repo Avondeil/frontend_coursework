@@ -231,6 +231,22 @@
     color: #007bff;
 }
 
+.comparison-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.comparison-label {
+    font-size: 1em;
+    margin-right: 8px;
+}
+
+.comparison-input {
+    transform: scale(1.3);
+    cursor: pointer;
+}
+
 .buy-button {
     padding: 10px 20px;
     background-color: #007bff;

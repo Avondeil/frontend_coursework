@@ -21,6 +21,7 @@ import ResetPassword from "./components/pages/ResetPassword";
 import AboutPage from "./components/pages/AboutPage";
 import ScrollToTop from './components/ui/ScrollToTop';
 import PartForm from "./components/pages/PartForm";
+import ComparePage from "./components/pages/ComparePage";
 
 function App() {
     return (
@@ -51,6 +52,7 @@ function App() {
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/add-part" element={<PartForm />} />
                             <Route path="/edit-part/:partId" element={<PartForm />} />
+                            <Route path="/compare" element={<ComparePage />} />
                         </Routes>
                         <Footer />
                     </Router>

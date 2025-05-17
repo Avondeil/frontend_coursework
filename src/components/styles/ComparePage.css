@@ -1,0 +1,275 @@
+.compare-page {
+    padding: 30px;
+    margin-top: 8vh;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%);
+    min-height: 100vh;
+    color: #1a1a1a;
+}
+
+.compare-page h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 40px;
+    font-size: 2.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.empty-comparison {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.empty-comparison p {
+    font-size: 1.5em;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.compare-mini-cards {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 25px;
+    margin-bottom: 40px;
+    padding: 10px;
+    scrollbar-width: thin;
+    -ms-overflow-style: none;
+    justify-content: center;
+}
+
+.compare-mini-cards::-webkit-scrollbar {
+    height: 8px;
+}
+
+.compare-mini-cards::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 4px;
+}
+
+.compare-mini-cards::-webkit-scrollbar-track {
+    background: #f0f4f8;
+}
+
+.mini-card {
+    border: none;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    background: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 200px;
+    margin: 5px;
+}
+
+.mini-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.mini-card img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.mini-card:hover img {
+    transform: rotate(5deg);
+}
+
+.mini-card h3 {
+    font-size: 1.3em;
+    color: #2c3e50;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.mini-card button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #ff6b6b, #ff8787);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mini-card button:hover {
+    background: linear-gradient(145deg, #e60000, #ff4d4d);
+    transform: translateY(-2px);
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 40px;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.compare-table th, .compare-table td {
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.compare-table th {
+    background: linear-gradient(145deg, #dfe9f3, #c0d3e8);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #2c3e50;
+}
+
+.compare-table td {
+    background: #fff;
+    transition: background 0.3s ease;
+}
+
+.compare-table tr:hover td {
+    background: #f5f7fa;
+}
+
+.best {
+    background: linear-gradient(145deg, #b8e994, #d4edda);
+    color: #155724;
+    font-weight: 600;
+}
+
+.best::after {
+    content: " ↑";
+    color: #155724;
+}
+
+.worst {
+    background: linear-gradient(145deg, #f8d7da, #fab1b7);
+    color: #721c24;
+    font-weight: 600;
+}
+
+.worst::after {
+    content: " ↓";
+    color: #721c24;
+}
+
+.clear-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    font-weight: 500;
+    display: block;
+    margin: 0 auto;
+}
+
+.clear-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.catalog-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.catalog-button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .compare-page {
+        padding: 20px;
+        margin-top: 0;
+    }
+
+    .compare-page h1 {
+        font-size: 2.2em;
+    }
+
+    .compare-mini-cards {
+        padding: 10px;
+    }
+
+    .mini-card {
+        flex: 0 0 180px;
+        margin: 5px;
+    }
+
+    .compare-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .compare-table th, .compare-table td {
+        min-width: 150px;
+    }
+
+    .empty-comparison p {
+        font-size: 1.2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .compare-page h1 {
+        font-size: 1.8em;
+    }
+
+    .mini-card {
+        flex: 0 0 160px;
+        margin: 5px;
+    }
+
+    .mini-card img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .mini-card h3 {
+        font-size: 1.1em;
+    }
+
+    .mini-card button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .compare-table th, .compare-table td {
+        padding: 10px;
+        font-size: 0.95em;
+    }
+
+    .clear-button, .catalog-button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .empty-comparison p {
+        font-size: 1em;
+    }
+}
