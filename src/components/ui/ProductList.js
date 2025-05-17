@@ -112,10 +112,7 @@ const ProductList = ({ products, categoryName, isAdmin }) => {
                 <p>Нет товаров для отображения</p>
             )}
             {canCompare && (
-                <button
-                    style={{ position: "fixed", bottom: "20px", right: "20px" }}
-                    onClick={handleCompareClick}
-                >
+                <button className="compare-button" onClick={handleCompareClick}>
                     Сравнить ({comparisonItems.length})
                 </button>
             )}
