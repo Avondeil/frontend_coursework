@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
+import { ComparisonContext } from "../contexts/ComparisonContext";
 import "../styles/ComparePage.css";
 
 const ComparePage = () => {
-    const [comparisonItems, setComparisonItems] = useState([]);
+    const { comparisonItems, setComparisonItems } = useContext(ComparisonContext);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -17,11 +18,6 @@ const ComparePage = () => {
         { id: 2, name: "Багажники" },
         { id: 3, name: "Запчасти и аксессуары" },
     ];
-
-    useEffect(() => {
-        const storedItems = JSON.parse(localStorage.getItem("comparisonItems")) || [];
-        setComparisonItems(storedItems);
-    }, []);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -60,7 +56,6 @@ const ComparePage = () => {
     const handleRemove = (partId) => {
         const updatedItems = comparisonItems.filter((id) => id !== partId);
         setComparisonItems(updatedItems);
-        localStorage.setItem("comparisonItems", JSON.stringify(updatedItems));
     };
 
     const clearComparison = () => {
@@ -70,7 +65,6 @@ const ComparePage = () => {
             return product && product.productTypeId !== selectedCategory;
         });
         setComparisonItems(updatedItems);
-        localStorage.setItem("comparisonItems", JSON.stringify(updatedItems));
     };
 
     // Функция для извлечения всех характеристик, включая вложенные

@@ -1,26 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../ui/AddToCartButton";
+import { ComparisonContext } from "../contexts/ComparisonContext";
 
 const ProductList = ({ products, categoryName, isAdmin }) => {
     const navigate = useNavigate();
-    const [comparisonItems, setComparisonItems] = useState([]);
-
-    // Загрузка выбранных товаров из localStorage при монтировании
-    useEffect(() => {
-        const storedItems = JSON.parse(localStorage.getItem("comparisonItems")) || [];
-        setComparisonItems(storedItems);
-    }, []);
-
-    // Сохранение в localStorage при изменении списка сравнения
-    useEffect(() => {
-        localStorage.setItem("comparisonItems", JSON.stringify(comparisonItems));
-    }, [comparisonItems]);
+    const { comparisonItems, setComparisonItems } = useContext(ComparisonContext);
 
     // Обработка изменения состояния чекбокса
     const handleComparisonChange = (partId, checked) => {
         if (checked) {
-            setComparisonItems((prev) => [...prev, partId]);
+            if (!comparisonItems.includes(partId)) {
+                setComparisonItems((prev) => [...prev, partId]);
+            }
         } else {
             setComparisonItems((prev) => prev.filter((id) => id !== partId));
         }

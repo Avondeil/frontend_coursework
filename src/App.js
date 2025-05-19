@@ -21,6 +21,7 @@ import ResetPassword from "./components/pages/ResetPassword";
 import AboutPage from "./components/pages/AboutPage";
 import ScrollToTop from './components/ui/ScrollToTop';
 import PartForm from "./components/pages/PartForm";
+import { ComparisonProvider } from './components/contexts/ComparisonContext';
 import ComparePage from "./components/pages/ComparePage";
 
 function App() {
@@ -28,34 +29,36 @@ function App() {
         <div className="App">
             <NotificationProvider>
                 <CartProvider>
-                    <Router>
-                        <ScrollToTop />
-                        <Header />
-                        <Routes>
-                            <Route path="/" element={
-                                <>
-                                    <Box />
-                                    <AutoPartsTransition />
-                                    <TypeListBox />
-                                    <Partners />
-                                </>
-                            } />
-                            <Route path="/auth" element={<Auth />} />
-                            <Route path="/registration" element={<Registration />} />
-                            <Route path="/reset-password" element={<ResetPassword />} />
-                            <Route path="/profile" element={<Profile />} />
-                            <Route path="/catalog" element={<ProductCategorySelection />} />
-                            <Route path="/catalog/:category" element={<Catalog />} />
-                            <Route path="/product/:partId" element={<ProductPage />} />
-                            <Route path="/cart" element={<CartPage />} />
-                            <Route path="/autoparts" element={<AutoParts />} />
-                            <Route path="/about" element={<AboutPage />} />
-                            <Route path="/add-part" element={<PartForm />} />
-                            <Route path="/edit-part/:partId" element={<PartForm />} />
-                            <Route path="/compare" element={<ComparePage />} />
-                        </Routes>
-                        <Footer />
-                    </Router>
+                    <ComparisonProvider>
+                        <Router>
+                            <ScrollToTop />
+                            <Header />
+                            <Routes>
+                                <Route path="/" element={
+                                    <>
+                                        <Box />
+                                        <AutoPartsTransition />
+                                        <TypeListBox />
+                                        <Partners />
+                                    </>
+                                } />
+                                <Route path="/auth" element={<Auth />} />
+                                <Route path="/registration" element={<Registration />} />
+                                <Route path="/reset-password" element={<ResetPassword />} />
+                                <Route path="/profile" element={<Profile />} />
+                                <Route path="/catalog" element={<ProductCategorySelection />} />
+                                <Route path="/catalog/:category" element={<Catalog />} />
+                                <Route path="/product/:partId" element={<ProductPage />} />
+                                <Route path="/cart" element={<CartPage />} />
+                                <Route path="/autoparts" element={<AutoParts />} />
+                                <Route path="/about" element={<AboutPage />} />
+                                <Route path="/add-part" element={<PartForm />} />
+                                <Route path="/edit-part/:partId" element={<PartForm />} />
+                                <Route path="/compare" element={<ComparePage />} />
+                            </Routes>
+                            <Footer />
+                        </Router>
+                    </ComparisonProvider>
                 </CartProvider>
             </NotificationProvider>
         </div>
