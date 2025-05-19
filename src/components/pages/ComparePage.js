@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
@@ -10,10 +10,11 @@ const ComparePage = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const navigate = useNavigate();
+    const isInitialMount = useRef(true);
 
     const categories = [
-        { id: 2, name: "Багажники" },
         { id: 1, name: "Автобоксы" },
+        { id: 2, name: "Багажники" },
         { id: 3, name: "Запчасти и аксессуары" },
     ];
 
@@ -35,19 +36,21 @@ const ComparePage = () => {
                 const fetchedProducts = responses.map((res) => res.data);
                 setProducts(fetchedProducts);
 
-                // Автоматический выбор категории
-                const categoryCounts = categories.map((cat) => ({
-                    id: cat.id,
-                    count: fetchedProducts.filter((p) => p.productTypeId === cat.id).length,
-                }));
-                const firstWithItems = categoryCounts.find((cat) => cat.count > 0);
-                setSelectedCategory(
-                    firstWithItems ? firstWithItems.id : categories[0].id
-                );
+                // Установка категории только при первом монтировании
+                if (isInitialMount.current) {
+                    isInitialMount.current = false;
+                    const categoryCounts = categories.map((cat) => ({
+                        id: cat.id,
+                        count: fetchedProducts.filter((p) => p.productTypeId === cat.id).length,
+                    }));
+                    const firstWithItems = categoryCounts.find((cat) => cat.count > 0);
+                    setSelectedCategory(
+                        firstWithItems ? firstWithItems.id : categories[0].id
+                    );
+                }
 
                 setLoading(false);
             } catch (error) {
-                console.error("Ошибка загрузки товаров:", error);
                 setLoading(false);
             }
         };
@@ -61,9 +64,11 @@ const ComparePage = () => {
     };
 
     const clearComparison = () => {
-        const updatedItems = comparisonItems.filter(
-            (id) => products.find((p) => p.partId === id).productTypeId !== selectedCategory
-        );
+        if (!selectedCategory) return;
+        const updatedItems = comparisonItems.filter((id) => {
+            const product = products.find((p) => p.partId === id);
+            return product && product.productTypeId !== selectedCategory;
+        });
         setComparisonItems(updatedItems);
         localStorage.setItem("comparisonItems", JSON.stringify(updatedItems));
     };
@@ -130,14 +135,12 @@ const ComparePage = () => {
         stockQuantity: "Количество на складе",
         description: "Описание",
         compatibilities: "Совместимость",
-        // Вложенные характеристики для автобоксов
         autobox_dimensionsMm: "Размеры (мм)",
         autobox_loadKg: "Грузоподъемность (кг)",
         autobox_volumeL: "Объем (л)",
         autobox_openingSystem: "Система открытия",
         autobox_countryOfOrigin: "Страна производства",
         autobox_color: "Цвет",
-        // Вложенные характеристики для багажников
         roofRack_lengthCm: "Длина (см)",
         roofRack_material: "Материал",
         roofRack_loadKg: "Грузоподъемность (кг)",
@@ -145,14 +148,12 @@ const ComparePage = () => {
         roofRack_crossbarShape: "Форма поперечины",
         roofRack_countryOfOrigin: "Страна производства",
         roofRack_color: "Цвет",
-        // Вложенные характеристики для запчастей
         spareParts_countryOfOrigin: "Страна производства",
         spareParts_color: "Цвет",
     };
 
     if (loading) return <div className="compare-page"><h1>Загрузка...</h1></div>;
 
-    // Фильтрация товаров по выбранной категории
     const filteredProducts = products.filter((p) => p.productTypeId === selectedCategory);
 
     return (
