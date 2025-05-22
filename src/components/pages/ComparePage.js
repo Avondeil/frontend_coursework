@@ -3,6 +3,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
 import { ComparisonContext } from "../contexts/ComparisonContext";
+import { HiOutlineTrash } from "react-icons/hi2";
 import "../styles/ComparePage.css";
 
 const ComparePage = () => {
@@ -10,6 +11,7 @@ const ComparePage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedForComparison, setSelectedForComparison] = useState([]);
     const navigate = useNavigate();
     const isInitialMount = useRef(true);
 
@@ -32,7 +34,6 @@ const ComparePage = () => {
                 const fetchedProducts = responses.map((res) => res.data);
                 setProducts(fetchedProducts);
 
-                // Установка категории только при первом монтировании
                 if (isInitialMount.current) {
                     isInitialMount.current = false;
                     const categoryCounts = categories.map((cat) => ({
@@ -45,6 +46,7 @@ const ComparePage = () => {
                     );
                 }
 
+                setSelectedForComparison(fetchedProducts.map((p) => p.partId));
                 setLoading(false);
             } catch (error) {
                 setLoading(false);
@@ -56,6 +58,7 @@ const ComparePage = () => {
     const handleRemove = (partId) => {
         const updatedItems = comparisonItems.filter((id) => id !== partId);
         setComparisonItems(updatedItems);
+        setSelectedForComparison((prev) => prev.filter((id) => id !== partId));
     };
 
     const clearComparison = () => {
@@ -65,9 +68,21 @@ const ComparePage = () => {
             return product && product.productTypeId !== selectedCategory;
         });
         setComparisonItems(updatedItems);
+        setSelectedForComparison((prev) => prev.filter((id) => !updatedItems.includes(id)));
     };
 
-    // Функция для извлечения всех характеристик, включая вложенные
+    const handleSelectForComparison = (partId) => {
+        setSelectedForComparison((prev) =>
+            prev.includes(partId)
+                ? prev.filter((id) => id !== partId)
+                : [...prev, partId]
+        );
+    };
+
+    const handleProductClick = (partId) => {
+        navigate(`/product/${partId}`);
+    };
+
     const getAllCharacteristics = (product) => {
         const characteristics = { ...product };
         delete characteristics.partId;
@@ -97,7 +112,6 @@ const ComparePage = () => {
         return characteristics;
     };
 
-    // Функция для форматирования значения характеристики
     const formatCharacteristic = (value) => {
         if (value === null || value === undefined) return "-";
         if (typeof value === "object") {
@@ -115,7 +129,6 @@ const ComparePage = () => {
         return value.toString();
     };
 
-    // Функция для определения, является ли характеристика числовой
     const isNumericCharacteristic = (char, products) => {
         return products.every((product) => {
             const value = product[char];
@@ -123,7 +136,6 @@ const ComparePage = () => {
         });
     };
 
-    // Перевод характеристик на русский
     const charTranslations = {
         price: "Цена (₽)",
         stockQuantity: "Количество на складе",
@@ -149,6 +161,7 @@ const ComparePage = () => {
     if (loading) return <div className="compare-page"><h1>Загрузка...</h1></div>;
 
     const filteredProducts = products.filter((p) => p.productTypeId === selectedCategory);
+    const selectedProducts = filteredProducts.filter((p) => selectedForComparison.includes(p.partId));
 
     return (
         <div className="compare-page">
@@ -175,69 +188,102 @@ const ComparePage = () => {
                 <>
                     <div className="compare-mini-cards">
                         {filteredProducts.map((product) => (
-                            <div key={product.partId} className="mini-card">
+                            <div
+                                key={product.partId}
+                                className="mini-card"
+                                onClick={() => handleProductClick(product.partId)}
+                            >
                                 <img
                                     src={product.imageUrl || "https://via.placeholder.com/140"}
                                     alt={product.name}
                                 />
                                 <h3>{product.name}</h3>
-                                <button onClick={() => handleRemove(product.partId)}>
-                                    Удалить
-                                </button>
+                                <div className="actions" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        className={`compare-toggle-button ${selectedForComparison.includes(product.partId) ? "active" : ""}`}
+                                        onClick={() => handleSelectForComparison(product.partId)}
+                                    >
+                                        {selectedForComparison.includes(product.partId) ? "Убрать из таблицы" : "Добавить в таблицу"}
+                                    </button>
+                                    <button
+                                        className="remove-icon-button"
+                                        onClick={() => handleRemove(product.partId)}
+                                        title="Удалить"
+                                    >
+                                        <HiOutlineTrash size={20} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
-                    <table className="compare-table">
-                        <thead>
-                        <tr>
-                            <th>Характеристика</th>
-                            {filteredProducts.map((product) => (
-                                <th key={product.partId}>{product.name}</th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {(() => {
-                            const allCharacteristics = filteredProducts.map(getAllCharacteristics);
-                            const commonCharacteristics = Object.keys(allCharacteristics[0] || {}).filter((key) =>
-                                allCharacteristics.every((char) => char.hasOwnProperty(key))
-                            );
-
-                            return commonCharacteristics.map((char) => (
-                                <tr key={char}>
-                                    <td>{charTranslations[char] || char}</td>
-                                    {allCharacteristics.map((characteristics, index) => {
-                                        const value = characteristics[char];
-                                        let isBest = false;
-                                        let isWorst = false;
-
-                                        if (isNumericCharacteristic(char, allCharacteristics)) {
-                                            const parsedValue =
-                                                typeof value === "string" ? parseFloat(value) : value;
-                                            const values = allCharacteristics.map((c) =>
-                                                typeof c[char] === "string" ? parseFloat(c[char]) : c[char]
-                                            );
-                                            isBest = parsedValue === Math.max(...values);
-                                            isWorst = parsedValue === Math.min(...values);
-                                        }
-
-                                        return (
-                                            <td
-                                                key={index}
-                                                className={isBest ? "best" : isWorst ? "worst" : ""}
+                    {selectedProducts.length > 0 ? (
+                        <table className="compare-table">
+                            <thead>
+                            <tr>
+                                <th>Характеристика</th>
+                                {selectedProducts.map((product) => (
+                                    <th key={product.partId}>
+                                        <div className="table-header">
+                                            <span>{product.name}</span>
+                                            <button
+                                                className="table-remove-button"
+                                                onClick={() => handleRemove(product.partId)}
+                                                title="Удалить"
                                             >
-                                                {formatCharacteristic(value)}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ));
-                        })()}
-                        </tbody>
-                    </table>
-                    <button className="clear-button" onClick={clearComparison}>
-                        Очистить сравнение
-                    </button>
+                                                <HiOutlineTrash size={16} />
+                                            </button>
+                                        </div>
+                                    </th>
+                                ))}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {(() => {
+                                const allCharacteristics = selectedProducts.map(getAllCharacteristics);
+                                const commonCharacteristics = Object.keys(allCharacteristics[0] || {}).filter((key) =>
+                                    allCharacteristics.every((char) => char.hasOwnProperty(key))
+                                );
+
+                                return commonCharacteristics.map((char) => (
+                                    <tr key={char}>
+                                        <td>{charTranslations[char] || char}</td>
+                                        {allCharacteristics.map((characteristics, index) => {
+                                            const value = characteristics[char];
+                                            let isBest = false;
+                                            let isWorst = false;
+
+                                            if (isNumericCharacteristic(char, allCharacteristics)) {
+                                                const parsedValue =
+                                                    typeof value === "string" ? parseFloat(value) : value;
+                                                const values = allCharacteristics.map((c) =>
+                                                    typeof c[char] === "string" ? parseFloat(c[char]) : c[char]
+                                                );
+                                                isBest = parsedValue === Math.max(...values);
+                                                isWorst = parsedValue === Math.min(...values);
+                                            }
+
+                                            return (
+                                                <td
+                                                    key={index}
+                                                    className={isBest ? "best" : isWorst ? "worst" : ""}
+                                                >
+                                                    {formatCharacteristic(value)}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ));
+                            })()}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p className="select-products-message">Отметьте товары для сравнения в таблице</p>
+                    )}
+                    <div className="clear-comparison-container">
+                        <button className="clear-button" onClick={clearComparison}>
+                            Очистить сравнение
+                        </button>
+                    </div>
                 </>
             )}
         </div>

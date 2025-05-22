@@ -91,8 +91,9 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    flex: 0 0 200px;
+    flex: 0 0 220px;
     margin: 5px;
+    cursor: pointer;
 }
 
 .mini-card:hover {
@@ -117,23 +118,66 @@
     color: #2c3e50;
     margin: 10px 0;
     font-weight: 500;
-}
-
-.mini-card button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: linear-gradient(145deg, #ff6b6b, #ff8787);
-    color: white;
-    border: none;
-    border-radius: 25px;
     cursor: pointer;
-    font-size: 1em;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    transition: color 0.2s ease;
 }
 
-.mini-card button:hover {
-    background: linear-gradient(145deg, #e60000, #ff4d4d);
+.mini-card:hover h3 {
+    color: #007bff;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.compare-toggle-button {
+    padding: 10px 12px;
+    flex-grow: 1;
+    font-size: 0.9em;
+    font-weight: 500;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    background: #007bff;
+}
+
+.compare-toggle-button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.compare-toggle-button.active {
+    background: #28a745;
+}
+
+.compare-toggle-button.active:hover {
+    background: #218838;
+}
+
+.remove-icon-button {
+    padding: 6px;
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.remove-icon-button:hover {
+    background: #e60000;
     transform: translateY(-2px);
 }
 
@@ -172,6 +216,32 @@
     background: #f5f7fa;
 }
 
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-remove-button {
+    padding: 4px;
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.table-remove-button:hover {
+    background: #e60000;
+}
+
 .best {
     background: linear-gradient(145deg, #b8e994, #d4edda);
     color: #155724;
@@ -205,7 +275,7 @@
     font-size: 1em;
     font-weight: 500;
     display: block;
-    margin: 0 auto;
+    margin: 20px auto;
 }
 
 .clear-button:hover {
@@ -227,6 +297,18 @@
 
 .catalog-button:hover {
     background-color: #0056b3;
+}
+
+.select-products-message {
+    text-align: center;
+    font-size: 1.8em;
+    color: #2c3e50;
+    margin: 40px 0;
+}
+
+.clear-comparison-container {
+    text-align: center;
+    margin-top: 20px;
 }
 
 @media (max-width: 768px) {
@@ -254,7 +336,7 @@
     }
 
     .mini-card {
-        flex: 0 0 180px;
+        flex: 0 0 200px;
         margin: 5px;
     }
 
@@ -271,6 +353,33 @@
     .empty-comparison p {
         font-size: 1.2em;
     }
+
+    .actions {
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .compare-toggle-button {
+        padding: 8px 10px;
+        flex-grow: 1;
+        font-size: 0.85em;
+    }
+
+    .remove-icon-button {
+        width: 28px;
+        height: 28px;
+    }
+
+    .select-products-message {
+        font-size: 1.4em;
+        margin: 30px 0;
+    }
+
+    .table-remove-button {
+        width: 22px;
+        height: 22px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -279,7 +388,7 @@
     }
 
     .mini-card {
-        flex: 0 0 160px;
+        flex: 0 0 180px;
         margin: 5px;
     }
 
@@ -292,9 +401,15 @@
         font-size: 1.1em;
     }
 
-    .mini-card button {
-        padding: 8px 15px;
-        font-size: 0.9em;
+    .compare-toggle-button {
+        padding: 6px 8px;
+        flex-grow: 1;
+        font-size: 0.8em;
+    }
+
+    .remove-icon-button {
+        width: 24px;
+        height: 24px;
     }
 
     .compare-table th, .compare-table td {
@@ -319,5 +434,15 @@
     .category-tab {
         width: 100%;
         max-width: 200px;
+    }
+
+    .select-products-message {
+        font-size: 1.2em;
+        margin: 20px 0;
+    }
+
+    .table-remove-button {
+        width: 20px;
+        height: 20px;
     }
 }
