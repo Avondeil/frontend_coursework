@@ -368,14 +368,15 @@
     }
 
     .compare-toggle-button {
-        padding: 8px 10px;
+        padding: 10px 12px;
         flex-grow: 1;
-        font-size: 0.85em;
+        font-size: 0.9em;
     }
 
     .remove-icon-button {
-        width: 28px;
-        height: 28px;
+        padding: 8px;
+        width: 36px;
+        height: 36px;
     }
 
     .select-products-message {
@@ -384,8 +385,9 @@
     }
 
     .table-remove-button {
-        width: 22px;
-        height: 22px;
+        padding: 6px;
+        width: 28px;
+        height: 28px;
     }
 }
 
@@ -410,14 +412,15 @@
     }
 
     .compare-toggle-button {
-        padding: 6px 8px;
+        padding: 8px 10px;
         flex-grow: 1;
-        font-size: 0.8em;
+        font-size: 0.85em;
     }
 
     .remove-icon-button {
-        width: 24px;
-        height: 24px;
+        padding: 6px;
+        width: 32px;
+        height: 32px;
     }
 
     .compare-table th, .compare-table td {
@@ -450,7 +453,8 @@
     }
 
     .table-remove-button {
-        width: 20px;
-        height: 20px;
+        padding: 5px;
+        width: 24px;
+        height: 24px;
     }
 }
