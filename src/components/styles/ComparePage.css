@@ -62,7 +62,7 @@
     overflow-x: auto;
     gap: 25px;
     margin-bottom: 40px;
-    padding: 10px;
+    padding: 10px 15px;
     scrollbar-width: thin;
     -ms-overflow-style: none;
     justify-content: center;
@@ -92,7 +92,7 @@
     position: relative;
     overflow: hidden;
     flex: 0 0 220px;
-    margin: 5px;
+    margin: 5px 0;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -327,7 +327,8 @@
     }
 
     .compare-mini-cards {
-        padding: 10px;
+        padding: 10px 15px;
+        justify-content: flex-start;
     }
 
     .category-tabs {
@@ -342,7 +343,7 @@
 
     .mini-card {
         flex: 0 0 200px;
-        margin: 5px;
+        margin: 5px 0;
         min-height: 280px;
     }
 
@@ -395,7 +396,7 @@
 
     .mini-card {
         flex: 0 0 180px;
-        margin: 5px;
+        margin: 5px 0;
         min-height: 260px;
     }
 
