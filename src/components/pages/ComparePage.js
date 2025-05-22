@@ -268,7 +268,9 @@ const ComparePage = () => {
                                                     key={index}
                                                     className={isBest ? "best" : isWorst ? "worst" : ""}
                                                 >
-                                                    {formatCharacteristic(value)}
+                                                    <div className={`cell-content ${isBest ? "best" : isWorst ? "worst" : ""}`}>
+                                                        {formatCharacteristic(value)}
+                                                    </div>
                                                 </td>
                                             );
                                         })}

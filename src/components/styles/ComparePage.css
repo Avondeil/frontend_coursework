@@ -206,7 +206,6 @@
     white-space: normal;
     word-wrap: break-word;
     max-width: 300px;
-    overflow: auto;
 }
 
 .compare-table th {
@@ -219,26 +218,65 @@
 .compare-table td {
     background: #fff;
     transition: background 0.3s ease;
-    max-height: 100px;
-    overflow-y: auto;
+    vertical-align: top;
 }
 
-.compare-table td::-webkit-scrollbar {
+.compare-table td.best {
+    background: linear-gradient(145deg, #b8e994, #d4edda);
+    color: #155724;
+    font-weight: 600;
+}
+
+.compare-table td.worst {
+    background: linear-gradient(145deg, #f8d7da, #fab1b7);
+    color: #721c24;
+    font-weight: 600;
+}
+
+.cell-content {
+    max-height: 100px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.cell-content::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
-.compare-table td::-webkit-scrollbar-thumb {
+.cell-content::-webkit-scrollbar-thumb {
     background-color: #007bff;
     border-radius: 3px;
 }
 
-.compare-table td::-webkit-scrollbar-track {
+.cell-content::-webkit-scrollbar-track {
     background: #f0f4f8;
+}
+
+.cell-content.best::after {
+    content: " ↑";
+    color: #155724;
+    display: inline;
+    margin-left: 4px;
+}
+
+.cell-content.worst::after {
+    content: " ↓";
+    color: #721c24;
+    display: inline;
+    margin-left: 4px;
 }
 
 .compare-table tr:hover td {
     background: #f5f7fa;
+}
+
+.compare-table tr:hover td.best {
+    background: linear-gradient(145deg, #b8e994, #d4edda);
+}
+
+.compare-table tr:hover td.worst {
+    background: linear-gradient(145deg, #f8d7da, #fab1b7);
 }
 
 .table-header {
@@ -265,28 +303,6 @@
 
 .table-remove-button:hover {
     background: #e60000;
-}
-
-.best {
-    background: linear-gradient(145deg, #b8e994, #d4edda);
-    color: #155724;
-    font-weight: 600;
-}
-
-.best::after {
-    content: " ↑";
-    color: #155724;
-}
-
-.worst {
-    background: linear-gradient(145deg, #f8d7da, #fab1b7);
-    color: #721c24;
-    font-weight: 600;
-}
-
-.worst::after {
-    content: " ↓";
-    color: #721c24;
 }
 
 .clear-button {
