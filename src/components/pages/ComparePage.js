@@ -68,7 +68,8 @@ const ComparePage = () => {
             return product && product.productTypeId !== selectedCategory;
         });
         setComparisonItems(updatedItems);
-        setSelectedForComparison((prev) => prev.filter((id) => !updatedItems.includes(id)));
+        setProducts(products.filter((p) => updatedItems.includes(p.partId)));
+        setSelectedForComparison((prev) => prev.filter((id) => updatedItems.includes(id)));
     };
 
     const handleSelectForComparison = (partId) => {
