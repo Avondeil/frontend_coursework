@@ -203,6 +203,10 @@
     text-align: center;
     font-size: 1.1em;
     color: #333;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 300px;
+    overflow: auto;
 }
 
 .compare-table th {
@@ -215,6 +219,22 @@
 .compare-table td {
     background: #fff;
     transition: background 0.3s ease;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.compare-table td::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.compare-table td::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 3px;
+}
+
+.compare-table td::-webkit-scrollbar-track {
+    background: #f0f4f8;
 }
 
 .compare-table tr:hover td {
@@ -350,11 +370,12 @@
     .compare-table {
         display: block;
         overflow-x: auto;
-        white-space: nowrap;
     }
 
     .compare-table th, .compare-table td {
         min-width: 150px;
+        max-width: 200px;
+        font-size: 1em;
     }
 
     .empty-comparison p {
@@ -426,6 +447,7 @@
     .compare-table th, .compare-table td {
         padding: 10px;
         font-size: 0.95em;
+        max-width: 150px;
     }
 
     .clear-button, .catalog-button {
