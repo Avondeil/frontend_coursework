@@ -5,9 +5,9 @@
     align-items: center;
     flex-direction: column;
     flex-grow: 1;
-    min-height: calc(100vh - 280px);
-    margin-top: 10vh;
-    margin-bottom: 8vh;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%);
+    padding: 30px;
 }
 
 .auth-form,
@@ -16,20 +16,26 @@
     flex-direction: column;
     width: 100%;
     max-width: 600px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .auth-form label,
 .registration-form label {
     margin: 5px;
+    color: #2c3e50;
+    font-weight: 500;
 }
 
 .auth-form .input-wrapper,
 .registration-form .input-wrapper {
     position: relative;
     margin-bottom: 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #e0e0e0;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: #f0f4f8;
     display: flex;
     align-items: center;
     padding: 5px;
@@ -38,7 +44,7 @@
 
 .auth-form .input-wrapper:focus-within,
 .registration-form .input-wrapper:focus-within {
-    border-color: #333;
+    border-color: #007bff;
     background-color: #fff;
 }
 
@@ -50,6 +56,7 @@
     padding: 10px;
     font-size: 1em;
     background: none;
+    color: #333;
 }
 
 .auth-form .input-wrapper .toggle-password,
@@ -58,14 +65,14 @@
     border: none;
     font-size: 1.2em;
     cursor: pointer;
-    color: #333;
+    color: #2c3e50;
     padding: 0 10px;
     transition: color 0.3s ease;
 }
 
 .auth-form .input-wrapper .toggle-password:hover,
 .registration-form .input-wrapper .toggle-password:hover {
-    color: black;
+    color: #007bff;
 }
 
 .required {
@@ -95,25 +102,25 @@
 
 .remember-label {
     margin-left: 5px;
-    color: #333;
+    color: #2c3e50;
     transition: color 0.2s ease;
 }
 
 .remember-label:hover {
-    color: black;
+    color: #007bff;
     cursor: pointer;
 }
 
 .auth-options a,
 .registration-options a {
-    color: #333333;
+    color: #2c3e50;
     transition: color 0.3s ease;
     text-decoration: none;
 }
 
 .auth-options a:hover,
 .registration-options a:hover {
-    color: black;
+    color: #007bff;
 }
 
 .auth-buttons,
@@ -127,20 +134,22 @@
 .registration-buttons button {
     flex: 1;
     height: 45px;
-    background: black;
+    background: #007bff;
     border-radius: 5px;
     color: white;
     font-size: 0.9em;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.3s ease;
     border: none;
     cursor: pointer;
 }
 
 .auth-buttons button:hover,
 .registration-buttons button:hover {
-    background: #333;
+    background: #0056b3;
+    transform: translateY(-2px);
 }
+
 .registration-checkbox {
     user-select: none;
 }
@@ -159,6 +168,17 @@
     margin-top: 5px;
 }
 
+.auth h1,
+.registration h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #2c3e50;
+    font-size: 2.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    text-align: center;
+}
 
 @media (max-width: 768px) {
     .auth-form,
@@ -166,25 +186,15 @@
         width: 85%;
     }
 
-    .auth {
-        margin: 20px;
-    }
-
+    .auth,
     .registration {
-        margin-top: 20px;
-        margin-bottom: 20px;
-
-        min-height: 67vh;
+        padding: 20px;
     }
 
     .auth h1,
     .registration h1 {
-        display: flex;
-        flex-wrap: wrap;
-        margin: 10px;
-        text-align: center;
-        align-items: center;
-        justify-content: center;
+        font-size: 2.2em;
+        margin-bottom: 20px;
     }
 
     .auth-buttons,
@@ -194,13 +204,29 @@
         gap: 10px;
     }
 
-    .auth-buttons
-    {
+    .auth-buttons {
         height: 100px;
     }
-    .registration-buttons
-    {
+
+    .registration-buttons {
         height: 50px;
     }
+}
 
+@media (max-width: 480px) {
+    .auth h1,
+    .registration h1 {
+        font-size: 1.8em;
+    }
+
+    .auth-form,
+    .registration-form {
+        padding: 15px;
+    }
+
+    .auth-buttons button,
+    .registration-buttons button {
+        height: 40px;
+        font-size: 0.85em;
+    }
 }
