@@ -123,15 +123,15 @@
     color: #007bff;
 }
 
-.auth-buttons,
-.registration-buttons {
+.auth .auth-buttons,
+.registration .registration-buttons {
     display: flex;
     flex-direction: row;
     gap: 10px;
 }
 
-.auth-buttons button,
-.registration-buttons button {
+.auth .auth-buttons button,
+.registration .registration-buttons button {
     flex: 1;
     height: 45px;
     background: #007bff;
@@ -144,8 +144,8 @@
     cursor: pointer;
 }
 
-.auth-buttons button:hover,
-.registration-buttons button:hover {
+.auth .auth-buttons button:hover,
+.registration .registration-buttons button:hover {
     background: #0056b3;
     transform: translateY(-2px);
 }
@@ -197,18 +197,18 @@
         margin-bottom: 20px;
     }
 
-    .auth-buttons,
-    .registration-buttons {
+    .auth .auth-buttons,
+    .registration .registration-buttons {
         flex-direction: column;
         margin-bottom: 15px;
         gap: 10px;
     }
 
-    .auth-buttons {
+    .auth .auth-buttons {
         height: 100px;
     }
 
-    .registration-buttons {
+    .registration .registration-buttons {
         height: 50px;
     }
 }
@@ -224,8 +224,8 @@
         padding: 15px;
     }
 
-    .auth-buttons button,
-    .registration-buttons button {
+    .auth .auth-buttons button,
+    .registration .registration-buttons button {
         height: 40px;
         font-size: 0.85em;
     }
