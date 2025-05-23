@@ -232,6 +232,7 @@ const ProfileOrders = () => {
                                                     <p className="item-name">{details.name || item.name}</p>
                                                     <p className="item-quantity">
                                                         {item.quantity} шт. x {item.price} ₽
+                                                        <p className="address-p"><strong>Адрес доставки:</strong> {order.deliveryAddress}</p>
                                                     </p>
                                                 </div>
                                                 <p className="item-price">

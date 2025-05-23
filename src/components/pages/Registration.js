@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useNotification } from "../contexts/NotificationContext";
 import { API_BASE_URL } from '../../config';
+import '../styles/Auth.css';
 
 const Registration = () => {
     const [formData, setFormData] = useState({
