@@ -88,6 +88,7 @@ const ComparePage = () => {
         const characteristics = { ...product };
         delete characteristics.partId;
         delete characteristics.name;
+        delete characteristics.stockQuantity;
         delete characteristics.imageUrl;
         delete characteristics.productTypeId;
         delete characteristics.autoboxParameter;
