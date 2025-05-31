@@ -17,6 +17,8 @@ const Catalog = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const categoryMap = {
         autoboxes: "Автобоксы",
@@ -25,13 +27,12 @@ const Catalog = () => {
     };
     const categoryName = categoryMap[category] || "Категория не найдена";
 
-    // Получаем данные о пользователе и проверяем его статус (админ или нет)
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
             if (!token) {
-                setIsAdmin(false); // Нет токена — не админ
+                setIsAdmin(false);
                 setIsLoading(false);
                 return;
             }
@@ -44,7 +45,6 @@ const Catalog = () => {
                     },
                 });
 
-                // Если полученные данные содержат статус администратора, проверяем его
                 if (response.data?.statusAdmin) {
                     setIsAdmin(true);
                 }
@@ -124,6 +124,7 @@ const Catalog = () => {
             });
 
             setFilteredProducts(filteredByPrice);
+            setCurrentPage(1);
         } catch (error) {
             console.error("Ошибка загрузки продуктов:", error);
             setError("Ошибка загрузки продуктов");
@@ -138,6 +139,7 @@ const Catalog = () => {
         setFilters({});
         setPriceRange({ priceFrom: "", priceTo: "" });
         setResetFiltersTrigger((prev) => !prev);
+        setCurrentPage(1);
     };
 
     const renderFiltersByCategory = () => {
@@ -196,6 +198,17 @@ const Catalog = () => {
         navigate(`/product/${partId}`);
     };
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     if (isLoading) return <div>Загрузка...</div>;
     if (error) return <div className="error">{error}</div>;
 
@@ -233,11 +246,30 @@ const Catalog = () => {
             <main className="catalog-items">
                 <h1>{categoryName}</h1>
                 <ProductList
-                    products={filteredProducts}
+                    products={currentProducts}
                     categoryName={categoryName}
                     onProductClick={handleProductClick}
                     isAdmin={isAdmin}
                 />
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                            &lt;
+                        </button>
+                        {[...Array(totalPages)].map((_, index) => (
+                            <button
+                                key={index + 1}
+                                onClick={() => handlePageChange(index + 1)}
+                                className={currentPage === index + 1 ? "active" : ""}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                            &gt;
+                        </button>
+                    </div>
+                )}
             </main>
         </div>
     );

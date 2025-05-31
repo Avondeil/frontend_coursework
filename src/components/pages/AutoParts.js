@@ -28,6 +28,8 @@ const AutoParts = () => {
     const [parts, setParts] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const categoryMap = {
         all: "Все запчасти",
@@ -69,11 +71,10 @@ const AutoParts = () => {
         fetchUserData();
     }, []);
 
-    // Запрос для получения деталей
     const fetchParts = async () => {
         try {
             const { category, brand, model, generation, bodyType } = filters;
-            setParts([]);  // Очистка списка деталей перед новым запросом
+            setParts([]);
             const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, {
                 params: {
                     brandId: brand?.brandId,
@@ -82,7 +83,8 @@ const AutoParts = () => {
                     bodyTypeId: bodyType?.bodyTypeId,
                 },
             });
-            setParts(response.data);  // Обновляем состояние с полученными данными
+            setParts(response.data);
+            setCurrentPage(1);
         } catch (error) {
             console.error("Ошибка загрузки деталей:", error);
         }
@@ -92,7 +94,6 @@ const AutoParts = () => {
         fetchParts();
     }, [filters.category, filters.brand, filters.model, filters.generation, filters.bodyType]);
 
-    // Запрос для получения брендов
     useEffect(() => {
         const fetchBrands = async () => {
             try {
@@ -105,27 +106,24 @@ const AutoParts = () => {
         fetchBrands();
     }, []);
 
-    // Запрос для получения моделей по выбранному бренду
     useEffect(() => {
         const fetchModels = async () => {
             if (filters.brand) {
                 try {
-                    // Исправленный запрос, теперь используем filters.brand.brandId для правильного получения моделей
                     const response = await axios.get(`${API_BASE_URL}/Models/ByBrand/${filters.brand.brandId}`);
                     setModels(response.data);
                 } catch (error) {
                     console.error("Ошибка загрузки моделей:", error);
                 }
             } else {
-                setModels([]);  // Если бренд не выбран, сбрасываем модели
-                setGenerations([]);  // Также сбрасываем поколения
-                setBodyTypes([]);  // И сбрасываем типы кузова
+                setModels([]);
+                setGenerations([]);
+                setBodyTypes([]);
             }
         };
         fetchModels();
     }, [filters.brand]);
 
-    // Запрос для получения поколений по модели
     useEffect(() => {
         const fetchGenerations = async () => {
             if (filters.model) {
@@ -138,14 +136,13 @@ const AutoParts = () => {
                     console.error("Ошибка загрузки поколений:", error);
                 }
             } else {
-                setGenerations([]);  // Если модель не выбрана, сбрасываем поколения
-                setBodyTypes([]);  // И сбрасываем типы кузова
+                setGenerations([]);
+                setBodyTypes([]);
             }
         };
         fetchGenerations();
     }, [filters.model]);
 
-    // Запрос для получения типов кузова по выбранному поколению
     useEffect(() => {
         const fetchBodyTypes = async () => {
             if (filters.generation) {
@@ -158,7 +155,7 @@ const AutoParts = () => {
                     console.error("Ошибка загрузки типов кузова:", error);
                 }
             } else {
-                setBodyTypes([]);  // Если поколение не выбрано, сбрасываем типы кузова
+                setBodyTypes([]);
             }
         };
         fetchBodyTypes();
@@ -168,7 +165,6 @@ const AutoParts = () => {
         setFilters((prev) => {
             const newFilters = { ...prev, [filterType]: selectedOption };
 
-            // Сброс зависимых фильтров
             if (filterType === "brand") {
                 newFilters.model = null;
                 newFilters.generation = null;
@@ -193,13 +189,26 @@ const AutoParts = () => {
             generation: null,
             bodyType: null,
         }));
-        setModels([]);  // Сбрасываем модели при смене категории
-        setGenerations([]);  // И сбрасываем поколения
-        setBodyTypes([]);  // Сбрасываем типы кузова
+        setModels([]);
+        setGenerations([]);
+        setBodyTypes([]);
+        setCurrentPage(1);
     };
 
     const resetFilters = () => {
         setFilters({ category: "all", brand: null, model: null, generation: null, bodyType: null });
+        setCurrentPage(1);
+    };
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentParts = parts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(parts.length / itemsPerPage);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
     };
 
     if (isLoading) return <div>Загрузка...</div>;
@@ -264,7 +273,26 @@ const AutoParts = () => {
                 {parts.length === 0 ? (
                     <p>Нет товаров, соответствующих выбранным фильтрам.</p>
                 ) : (
-                    <ProductList products={parts} isAdmin={isAdmin} />
+                    <ProductList products={currentParts} isAdmin={isAdmin} />
+                )}
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                            &lt;
+                        </button>
+                        {[...Array(totalPages)].map((_, index) => (
+                            <button
+                                key={index + 1}
+                                onClick={() => handlePageChange(index + 1)}
+                                className={currentPage === index + 1 ? "active" : ""}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                            &gt;
+                        </button>
+                    </div>
                 )}
             </main>
         </div>
