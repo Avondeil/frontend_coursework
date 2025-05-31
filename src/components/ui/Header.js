@@ -3,7 +3,6 @@ import SidebarModal from "./SidebarModal"; // Компонент модальн�
 import PhoneListModal from "./PhoneListModal";
 import { Link, useNavigate } from 'react-router-dom'; // useNavigate для перенаправления
 import SearchModal from "./SearchModal"; // Импортируем модальное окно для поиска
-import { MdCompareArrows } from "react-icons/md";
 import '../styles/Header.css';
 
 const Header = () => {
@@ -53,6 +52,7 @@ const Header = () => {
                 <div className="header-right">
                     <a id="phone_list" onClick={togglePhoneList}></a>
                     <Link to="/compare" id="compare"></Link>
+                    <Link to="/add-part" id="add_part"></Link>
                     <a id="search" onClick={toggleSearchModal}></a>
                     <button id="account_auth" onClick={handleProfileClick}></button>
                     <Link to="/cart" id="basket"></Link>

@@ -49,7 +49,7 @@
 }
 
 
-#phone_list, #search, #account_auth, #basket, #compare {
+#phone_list, #search, #account_auth, #basket, #compare, #add_part {
     background: url("/public/phone.svg") no-repeat center;
     background-size: contain;
     margin-left: 15px;
@@ -72,6 +72,11 @@
 
 #compare {
     background: url("/public/compare.svg") no-repeat center;
+    background-size: contain;
+}
+
+#add_part {
+    background: url("/public/add.svg") no-repeat center;
     background-size: contain;
 }
 
