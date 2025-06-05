@@ -272,7 +272,7 @@ const ProfileOrders = () => {
                                             </>
                                         ) : (
                                             <button
-                                                className="order-action-button"
+                                                className={`order-action-button ${order.status === "В пути" ? "disabled" : ""}`}
                                                 onClick={() => handleCancelOrderClick(order.orderId)}
                                                 disabled={order.status === "В пути"}
                                             >
