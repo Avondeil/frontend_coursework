@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../../config';
 import '../styles/ProfileOrders.css';
 import { useCart } from "../contexts/CartContext"; // Контекст для корзины
+import CancelOrderModal from "../ui/CancelOrderModal"; // Импортируем модальное окно
 
 const ProfileOrders = () => {
     const [orders, setOrders] = useState([]); // Список заказов
@@ -12,6 +13,8 @@ const ProfileOrders = () => {
     const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState({}); // Статус открытых заказов
     const { showNotification } = useNotification(); // Хук для уведомлений
     const { addToCart } = useCart(); // Хук для добавления товаров в корзину
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false); // Видимость модального окна
+    const [orderToCancel, setOrderToCancel] = useState(null); // Заказ для отмены
 
     const toggleOrderDetails = (orderId) => {
         setIsOrderDetailsOpen((prevState) => ({
@@ -77,8 +80,16 @@ const ProfileOrders = () => {
         fetchOrders();
     }, []);
 
+    // Обработчик для открытия модального окна отмены заказа
+    const handleCancelOrderClick = (orderId) => {
+        setOrderToCancel(orderId);
+        setIsCancelModalOpen(true);
+    };
+
     // Обработчик для отмены заказа
-    const cancelOrder = async (orderId) => {
+    const cancelOrder = async () => {
+        if (!orderToCancel) return;
+
         try {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
@@ -86,7 +97,7 @@ const ProfileOrders = () => {
                 throw new Error("Пользователь не авторизован.");
             }
 
-            const response = await axios.post(`${API_BASE_URL}/Order/cancel/${orderId}`, {}, {
+            const response = await axios.post(`${API_BASE_URL}/Order/cancel/${orderToCancel}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
@@ -104,7 +115,7 @@ const ProfileOrders = () => {
             // Обновляем список заказов после отмены
             setOrders((prevOrders) =>
                 prevOrders.map((order) =>
-                    order.orderId === orderId
+                    order.orderId === orderToCancel
                         ? { ...order, status: "Отменён" } // Обновляем статус на "Отменён"
                         : order
                 )
@@ -115,6 +126,9 @@ const ProfileOrders = () => {
             });
         } catch (error) {
             console.error("Ошибка при отмене заказа:", error);
+        } finally {
+            setIsCancelModalOpen(false);
+            setOrderToCancel(null);
         }
     };
 
@@ -257,7 +271,11 @@ const ProfileOrders = () => {
                                                 </button>
                                             </>
                                         ) : (
-                                            <button className="order-action-button" onClick={() => cancelOrder(order.orderId)}>
+                                            <button
+                                                className="order-action-button"
+                                                onClick={() => handleCancelOrderClick(order.orderId)}
+                                                disabled={order.status === "В пути"}
+                                            >
                                                 Отменить заказ
                                             </button>
                                         )}
@@ -268,6 +286,12 @@ const ProfileOrders = () => {
                     </div>
                 ))
             )}
+            <CancelOrderModal
+                isOpen={isCancelModalOpen}
+                onClose={() => setIsCancelModalOpen(false)}
+                onConfirm={cancelOrder}
+                orderNumber={orderToCancel}
+            />
         </div>
     );
 };
