@@ -209,6 +209,33 @@ const Catalog = () => {
         }
     };
 
+    const renderPagination = () => {
+        const pages = [];
+        const delta = 2;
+
+        pages.push(1);
+        if (currentPage - delta > 2) pages.push('...');
+        for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+            pages.push(i);
+        }
+        if (currentPage + delta < totalPages - 1) pages.push('...');
+        if (totalPages > 1) pages.push(totalPages);
+
+        return pages.map((page, index) =>
+            page === '...' ? (
+                <span key={index}>...</span>
+            ) : (
+                <button
+                    key={index}
+                    onClick={() => handlePageChange(page)}
+                    className={currentPage === page ? 'active' : ''}
+                >
+                    {page}
+                </button>
+            )
+        );
+    };
+
     if (isLoading) return <div>Загрузка...</div>;
     if (error) return <div className="error">{error}</div>;
 
@@ -256,15 +283,7 @@ const Catalog = () => {
                         <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                             &lt;
                         </button>
-                        {[...Array(totalPages)].map((_, index) => (
-                            <button
-                                key={index + 1}
-                                onClick={() => handlePageChange(index + 1)}
-                                className={currentPage === index + 1 ? "active" : ""}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
+                        {renderPagination()}
                         <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
                             &gt;
                         </button>
