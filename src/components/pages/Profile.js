@@ -104,12 +104,14 @@ const Profile = () => {
                     >
                         Профиль
                     </li>
-                    <li
-                        className={`sidebar-item ${activePage === 'orders' ? 'active' : ''}`}
-                        onClick={() => setActivePage('orders')}
-                    >
-                        Заказы
-                    </li>
+                    {!userData.statusAdmin && (
+                        <li
+                            className={`sidebar-item ${activePage === 'orders' ? 'active' : ''}`}
+                            onClick={() => setActivePage('orders')}
+                        >
+                            Заказы
+                        </li>
+                    )}
                     {userData.statusAdmin && (
                         <li
                             className={`sidebar-item ${activePage === 'manage' ? 'active' : ''}`}
