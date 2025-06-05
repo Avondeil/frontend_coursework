@@ -9,14 +9,103 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
 .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
     width: 100%;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+    overflow-x: hidden;
+}
+
+.modal-content h2 {
+    font-family: 'Roboto', sans-serif;
+    color: #2c3e50;
+    font-size: 2.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 580px;
+    margin: 0 10px;
+    box-sizing: border-box;
+    padding: 20px 20px;
+}
+
+.auth-form label {
+    margin: 5px;
+    color: #2c3e50;
+    font-weight: 500;
+    text-align: left;
+    display: block;
+}
+
+.auth-form .input-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #f0f4f8;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.auth-form .input-wrapper:focus-within {
+    border-color: #007bff;
+    background-color: #fff;
+}
+
+.auth-form .input-wrapper input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 1em;
+    background: none;
+    color: #333;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.auth-buttons button {
+    flex: 1;
+    height: 45px;
+    background: #007bff;
+    border-radius: 5px;
+    color: white;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.auth-buttons button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.auth-buttons button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .close-btn {
@@ -33,79 +122,57 @@
     color: red;
 }
 
-/* Стили для формы */
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-.auth-form label {
-    margin: 5px;
-}
-
-.auth-form .input-wrapper {
-    position: relative;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    display: flex;
-    align-items: center;
-    padding: 5px;
-}
-
-.auth-form .input-wrapper:focus-within {
-    border-color: #333;
-    background-color: #fff;
-}
-
-.auth-form .input-wrapper input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 10px;
-    font-size: 1em;
-    background: none;
-}
-
-.auth-form .input-wrapper input:focus {
-    outline: none;
-}
-
-.auth-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.auth-buttons button {
-    flex: 1;
-    height: 45px;
-    background: black;
-    border-radius: 5px;
-    color: white;
-    font-size: 0.9em;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.auth-buttons button:hover {
-    background: #333;
-}
-
-.error {
-    color: red;
-    font-size: 1em;
-    text-align: center;
-    margin-top: 10px;
-}
-
 @media (max-width: 768px) {
     .modal-content {
         width: 85%;
+        padding: 20px;
+    }
+
+    .modal-content h2 {
+        font-size: 2.2em;
+        margin-bottom: 20px;
+    }
+
+    .auth-form {
+        margin: 0 5px;
+        padding: 20px 5px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .auth-buttons button {
+        height: 40px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content h2 {
+        font-size: 1.8em;
+    }
+
+    .auth-form {
+        margin: 0 5px;
+        padding: 20px 5px;
+    }
+
+    .auth-buttons button {
+        height: 50px;
+        font-size: 1em;
+        padding: 10px;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
