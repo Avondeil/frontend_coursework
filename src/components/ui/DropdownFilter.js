@@ -6,10 +6,12 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
     const [range, setRange] = useState({ from: "", to: "" });
 
     const getLabel = (option) => {
+        if (!option) return "";
+        if (typeof option === "string") return option;
         if (typeof getOptionLabel === "function") {
             return getOptionLabel(option);
         }
-        return typeof option === "string" ? option : JSON.stringify(option);
+        return option.label || option.name || option.value || JSON.stringify(option);
     };
 
     useEffect(() => {
@@ -24,7 +26,7 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
         const label = getLabel(opt);
         const matchesSearch = typeof label === "string" && label.toLowerCase().includes(search.toLowerCase());
 
-        if (enableRange) {
+        if (enableRange && !isNaN(parseFloat(label))) {
             const numericValue = parseFloat(label);
             const fromValid = !range.from || numericValue >= parseFloat(range.from);
             const toValid = !range.to || numericValue <= parseFloat(range.to);
@@ -34,8 +36,9 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
         return matchesSearch;
     });
 
-    const validOptions = filteredOptions.filter((opt) => opt.isValid);
-    const invalidOptions = filteredOptions.filter((opt) => !opt.isValid);
+    // Опции без isValid считаются валидными для AutoParts (марки, модели, категории)
+    const validOptions = filteredOptions.filter((opt) => opt.isValid !== false);
+    const invalidOptions = filteredOptions.filter((opt) => opt.isValid === false);
 
     const sortedOptions = [...validOptions, ...invalidOptions];
 
@@ -47,7 +50,7 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
     return (
         <div className="dropdown">
             <div className="dropdown-label" onClick={() => setIsOpen(!isOpen)}>
-                <span>{label}: {selected ? getLabel({ value: selected }) : "Не выбрано"}</span>
+                <span>{label}: {selected ? getLabel(selected) : "Не выбрано"}</span>
                 <span className={`arrow ${isOpen ? "open" : ""}`}></span>
             </div>
             {isOpen && (
@@ -84,10 +87,18 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
                             sortedOptions.map((option, index) => (
                                 <li
                                     key={index}
-                                    className={option.isValid ? (selected === option.value ? "selected" : "") : "inactive"}
+                                    className={
+                                        option.isValid !== false
+                                            ? getLabel(selected) === getLabel(option)
+                                                ? "selected"
+                                                : ""
+                                            : "inactive"
+                                    }
                                     onClick={() => {
-                                        if (option.isValid) {
-                                            onChange(option.value);
+                                        if (option.isValid !== false) {
+                                            // Для Catalog: option.value, для AutoParts: option или option.value
+                                            const value = option.value !== undefined ? option.value : option;
+                                            onChange(value);
                                             setIsOpen(false);
                                         }
                                     }}
@@ -96,7 +107,7 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
                                 </li>
                             ))
                         ) : (
-                            <li className="dropdown-no-results">Нет результатов</li>
+                            <li className="inactive">Нет выбора</li>
                         )}
                     </ul>
                 </div>
