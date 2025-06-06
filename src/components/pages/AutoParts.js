@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Catalog.css";
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from "../../config";
 import DropdownFilter from "../ui/DropdownFilter";
 import ProductList from "../ui/ProductList";
 
@@ -12,6 +13,9 @@ const AutoParts = () => {
         model: null,
         generation: null,
         bodyType: null,
+        categoryParams: {},
+        priceFrom: "",
+        priceTo: "",
     });
 
     const [categories] = useState([
@@ -26,8 +30,12 @@ const AutoParts = () => {
     const [generations, setGenerations] = useState([]);
     const [bodyTypes, setBodyTypes] = useState([]);
     const [parts, setParts] = useState([]);
+    const [parametersData, setParametersData] = useState([]);
+    const [parameterOptions, setParameterOptions] = useState({});
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isParametersLoading, setIsParametersLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -38,18 +46,16 @@ const AutoParts = () => {
         parts_accessories: "Запчасти и аксессуары",
     };
 
+    const validCategories = ["all", "autoboxes", "roof_racks", "parts_accessories"];
     const categoryName = categoryMap[filters.category] || "Категория не найдена";
 
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
             if (!token) {
                 setIsAdmin(false);
-                setIsLoading(false);
                 return;
             }
-
             try {
                 const response = await axios.get(`${API_BASE_URL}/user/me`, {
                     headers: {
@@ -57,50 +63,26 @@ const AutoParts = () => {
                         "Content-Type": "application/json",
                     },
                 });
-
                 if (response.data?.statusAdmin) {
                     setIsAdmin(true);
                 }
             } catch (err) {
-                console.error("Ошибка при получении данных пользователя:", err);
+                setError(err.response ? `Ошибка ${err.response.status}: ${err.response.statusText}` : `Ошибка: ${err.message}`);
             } finally {
                 setIsLoading(false);
             }
         };
-
         fetchUserData();
     }, []);
-
-    const fetchParts = async () => {
-        try {
-            const { category, brand, model, generation, bodyType } = filters;
-            setParts([]);
-            const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, {
-                params: {
-                    brandId: brand?.brandId,
-                    modelId: model?.modelId,
-                    generationId: generation?.generationId,
-                    bodyTypeId: bodyType?.bodyTypeId,
-                },
-            });
-            setParts(response.data);
-            setCurrentPage(1);
-        } catch (error) {
-            console.error("Ошибка загрузки деталей:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchParts();
-    }, [filters.category, filters.brand, filters.model, filters.generation, filters.bodyType]);
 
     useEffect(() => {
         const fetchBrands = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/Brands`);
-                setBrands(response.data);
+                setBrands(response.data || []);
             } catch (error) {
-                console.error("Ошибка загрузки марок:", error);
+                setError("Ошибка загрузки марок");
+                setBrands([]);
             }
         };
         fetchBrands();
@@ -108,12 +90,13 @@ const AutoParts = () => {
 
     useEffect(() => {
         const fetchModels = async () => {
-            if (filters.brand) {
+            if (filters.brand?.brandId) {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/Models/ByBrand/${filters.brand.brandId}`);
-                    setModels(response.data);
+                    setModels(response.data || []);
                 } catch (error) {
-                    console.error("Ошибка загрузки моделей:", error);
+                    setError("Ошибка загрузки моделей");
+                    setModels([]);
                 }
             } else {
                 setModels([]);
@@ -126,14 +109,13 @@ const AutoParts = () => {
 
     useEffect(() => {
         const fetchGenerations = async () => {
-            if (filters.model) {
+            if (filters.model?.modelId) {
                 try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/Generations/ByModel/${filters.model.modelId}`
-                    );
-                    setGenerations(response.data);
+                    const response = await axios.get(`${API_BASE_URL}/Generations/ByModel/${filters.model.modelId}`);
+                    setGenerations(response.data || []);
                 } catch (error) {
-                    console.error("Ошибка загрузки поколений:", error);
+                    setError("Ошибка загрузки поколений");
+                    setGenerations([]);
                 }
             } else {
                 setGenerations([]);
@@ -145,14 +127,13 @@ const AutoParts = () => {
 
     useEffect(() => {
         const fetchBodyTypes = async () => {
-            if (filters.generation) {
+            if (filters.generation?.generationId) {
                 try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/BodyTypes/ByGeneration/${filters.generation.generationId}`
-                    );
-                    setBodyTypes(response.data);
+                    const response = await axios.get(`${API_BASE_URL}/BodyTypes/ByGeneration/${filters.generation.generationId}`);
+                    setBodyTypes(response.data || []);
                 } catch (error) {
-                    console.error("Ошибка загрузки типов кузова:", error);
+                    setError("Ошибка загрузки типов кузова");
+                    setBodyTypes([]);
                 }
             } else {
                 setBodyTypes([]);
@@ -161,10 +142,150 @@ const AutoParts = () => {
         fetchBodyTypes();
     }, [filters.generation]);
 
+    useEffect(() => {
+        const fetchParameters = async () => {
+            if (filters.category === "all") {
+                setParametersData([]);
+                setParameterOptions({});
+                setIsParametersLoading(false);
+                return;
+            }
+            setIsParametersLoading(true);
+            try {
+                let paramsUrl = null;
+                if (filters.category === "autoboxes") {
+                    paramsUrl = `${API_BASE_URL}/AutoboxParameters`;
+                } else if (filters.category === "roof_racks") {
+                    paramsUrl = `${API_BASE_URL}/RoofRackParameters`;
+                } else if (filters.category === "parts_accessories") {
+                    paramsUrl = `${API_BASE_URL}/SparePartsParameters`;
+                }
+                if (!paramsUrl) {
+                    setParametersData([]);
+                    setParameterOptions({});
+                    return;
+                }
+                const response = await axios.get(paramsUrl);
+                const data = Array.isArray(response.data) ? response.data : [];
+                setParametersData(data);
+                updateParameterOptions(data, filters.categoryParams);
+            } catch (error) {
+                setError("Ошибка загрузки параметров");
+                setParametersData([]);
+                setParameterOptions({});
+            } finally {
+                setIsParametersLoading(false);
+            }
+        };
+        fetchParameters();
+    }, [filters.category]);
+
+    useEffect(() => {
+        if (parametersData.length > 0) {
+            updateParameterOptions(parametersData, filters.categoryParams);
+        }
+    }, [filters.categoryParams, parametersData]);
+
+    const updateParameterOptions = (data, currentFilters) => {
+        if (!Array.isArray(data) || !data.length) {
+            setParameterOptions({});
+            return;
+        }
+
+        const filteredData = data.filter((item) =>
+            Object.entries(currentFilters).every(([key, value]) => !value || item[key]?.toString() === value.toString())
+        );
+
+        const allOptions = {
+            dimensionsMm: [...new Set(data.map((item) => item.dimensionsMm?.toString()).filter(Boolean))].sort(),
+            lengthCm: [...new Set(data.map((item) => item.lengthCm?.toString()).filter(Boolean))].sort(),
+            loadKg: [...new Set(data.map((item) => item.loadKg?.toString()).filter(Boolean))].sort(),
+            volumeL: [...new Set(data.map((item) => item.volumeL?.toString()).filter(Boolean))].sort(),
+            openingSystem: [...new Set(data.map((item) => item.openingSystem?.toString()).filter(Boolean))].sort(),
+            color: [...new Set(data.map((item) => item.color?.toString()).filter(Boolean))].sort(),
+            countryOfOrigin: [...new Set(data.map((item) => item.countryOfOrigin?.toString()).filter(Boolean))].sort(),
+            material: [...new Set(data.map((item) => item.material?.toString()).filter(Boolean))].sort(),
+            mountingType: [...new Set(data.map((item) => item.mountingType?.toString()).filter(Boolean))].sort(),
+            crossbarShape: [...new Set(data.map((item) => item.crossbarShape?.toString()).filter(Boolean))].sort(),
+        };
+
+        const validOptions = {
+            dimensionsMm: [...new Set(filteredData.map((item) => item.dimensionsMm?.toString()).filter(Boolean))].sort(),
+            lengthCm: [...new Set(filteredData.map((item) => item.lengthCm?.toString()).filter(Boolean))].sort(),
+            loadKg: [...new Set(filteredData.map((item) => item.loadKg?.toString()).filter(Boolean))].sort(),
+            volumeL: [...new Set(filteredData.map((item) => item.volumeL?.toString()).filter(Boolean))].sort(),
+            openingSystem: [...new Set(filteredData.map((item) => item.openingSystem?.toString()).filter(Boolean))].sort(),
+            color: [...new Set(filteredData.map((item) => item.color?.toString()).filter(Boolean))].sort(),
+            countryOfOrigin: [...new Set(filteredData.map((item) => item.countryOfOrigin?.toString()).filter(Boolean))].sort(),
+            material: [...new Set(filteredData.map((item) => item.material?.toString()).filter(Boolean))].sort(),
+            mountingType: [...new Set(filteredData.map((item) => item.mountingType?.toString()).filter(Boolean))].sort(),
+            crossbarShape: [...new Set(filteredData.map((item) => item.crossbarShape?.toString()).filter(Boolean))].sort(),
+        };
+
+        const newParameterOptions = Object.keys(allOptions).reduce((acc, key) => ({
+            ...acc,
+            [key]: allOptions[key].map((value) => ({
+                value,
+                isValid: validOptions[key].includes(value),
+            })),
+        }), {});
+
+        setParameterOptions(newParameterOptions);
+    };
+
+    const fetchParts = async () => {
+        try {
+            setIsLoading(true);
+            const { category, brand, model, generation, bodyType, categoryParams, priceFrom, priceTo } = filters;
+            const validCategoryParams = Object.fromEntries(
+                Object.entries(categoryParams).filter(([_, value]) => value != null && value !== "")
+            );
+            const params = {
+                brandId: brand?.brandId,
+                modelId: model?.modelId,
+                generationId: generation?.generationId,
+                bodyTypeId: bodyType?.bodyTypeId,
+                ...validCategoryParams,
+            };
+
+            const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, { params });
+            let filteredParts = response.data || [];
+
+            if (priceFrom || priceTo) {
+                filteredParts = filteredParts.filter((part) => {
+                    const price = part.price;
+                    const from = parseFloat(priceFrom) || 0;
+                    const to = parseFloat(priceTo) || Infinity;
+                    return price >= from && price <= to;
+                });
+            }
+
+            setParts(filteredParts);
+            setCurrentPage(1);
+        } catch (error) {
+            setError("Ошибка загрузки деталей");
+            setParts([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchParts();
+    }, [
+        filters.category,
+        filters.brand,
+        filters.model,
+        filters.generation,
+        filters.bodyType,
+        filters.categoryParams,
+        filters.priceFrom,
+        filters.priceTo,
+    ]);
+
     const handleFilterChange = (filterType, selectedOption) => {
         setFilters((prev) => {
             const newFilters = { ...prev, [filterType]: selectedOption };
-
             if (filterType === "brand") {
                 newFilters.model = null;
                 newFilters.generation = null;
@@ -175,29 +296,125 @@ const AutoParts = () => {
             } else if (filterType === "generation") {
                 newFilters.bodyType = null;
             }
-
             return newFilters;
         });
     };
 
-    const handleCategoryChange = (category) => {
+    const handleCategoryParamChange = (key, value) => {
         setFilters((prev) => ({
             ...prev,
-            category,
+            categoryParams: { ...prev.categoryParams, [key]: value || "" },
+        }));
+    };
+
+    const handlePriceChange = (key, value) => {
+        setFilters((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
+    const handleCategoryChange = (category) => {
+        const categoryValue = validCategories.includes(category) ? category : "all";
+        setFilters((prev) => ({
+            ...prev,
+            category: categoryValue,
             brand: null,
             model: null,
             generation: null,
             bodyType: null,
+            categoryParams: {},
+            priceFrom: "",
+            priceTo: "",
         }));
         setModels([]);
         setGenerations([]);
         setBodyTypes([]);
+        setParametersData([]);
+        setParameterOptions({});
         setCurrentPage(1);
     };
 
     const resetFilters = () => {
-        setFilters({ category: "all", brand: null, model: null, generation: null, bodyType: null });
+        setFilters({
+            category: "all",
+            brand: null,
+            model: null,
+            generation: null,
+            bodyType: null,
+            categoryParams: {},
+            priceFrom: "",
+            priceTo: "",
+        });
+        setModels([]);
+        setGenerations([]);
+        setBodyTypes([]);
+        setParametersData([]);
+        setParameterOptions({});
         setCurrentPage(1);
+    };
+
+    const renderCategoryFilters = () => {
+        if (filters.category === "all") return null;
+        if (isParametersLoading) return <div>Загрузка фильтров...</div>;
+
+        const params = parameterOptions || {};
+
+        const createDropdown = (label, key, enableRange = false) => {
+            const sortedOptions = (params[key] || []).sort((a, b) => {
+                if (a.isValid && !b.isValid) return -1;
+                if (!a.isValid && b.isValid) return 1;
+                return a.value.localeCompare(b.value);
+            });
+
+            return (
+                <DropdownFilter
+                    key={key}
+                    label={label}
+                    options={sortedOptions.map(opt => ({
+                        ...opt,
+                        isDisabled: !opt.isValid,
+                    }))}
+                    selected={filters.categoryParams[key] || ""}
+                    onChange={(value) => handleCategoryParamChange(key, value)}
+                    getOptionLabel={(opt) => opt.value}
+                    enableRange={enableRange}
+                />
+            );
+        };
+
+        switch (filters.category) {
+            case "autoboxes":
+                return (
+                    <>
+                        {createDropdown("Размер (мм)", "dimensionsMm")}
+                        {createDropdown("Нагрузочный лимит (кг)", "loadKg", true)}
+                        {createDropdown("Объем (литры)", "volumeL", true)}
+                        {createDropdown("Система открывания", "openingSystem")}
+                        {createDropdown("Цвет", "color")}
+                        {createDropdown("Страна производителя", "countryOfOrigin")}
+                    </>
+                );
+            case "roof_racks":
+                return (
+                    <>
+                        {createDropdown("Длина (см)", "lengthCm", true)}
+                        {createDropdown("Материал", "material")}
+                        {createDropdown("Нагрузочный лимит (кг)", "loadKg", true)}
+                        {createDropdown("Тип крепления", "mountingType")}
+                        {createDropdown("Форма поперечин", "crossbarShape")}
+                    </>
+                );
+            case "parts_accessories":
+                return (
+                    <>
+                        {createDropdown("Цвет", "color")}
+                        {createDropdown("Страна производителя", "countryOfOrigin")}
+                    </>
+                );
+            default:
+                return null;
+        }
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -216,21 +433,21 @@ const AutoParts = () => {
         const delta = 2;
 
         pages.push(1);
-        if (currentPage - delta > 2) pages.push('...');
+        if (currentPage - delta > 2) pages.push("...");
         for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
             pages.push(i);
         }
-        if (currentPage + delta < totalPages - 1) pages.push('...');
+        if (currentPage + delta < totalPages - 1) pages.push("...");
         if (totalPages > 1) pages.push(totalPages);
 
         return pages.map((page, index) =>
-            page === '...' ? (
+            page === "..." ? (
                 <span key={index}>...</span>
             ) : (
                 <button
                     key={index}
                     onClick={() => handlePageChange(page)}
-                    className={currentPage === page ? 'active' : ''}
+                    className={currentPage === page ? "active" : ""}
                 >
                     {page}
                 </button>
@@ -238,7 +455,14 @@ const AutoParts = () => {
         );
     };
 
+    const navigate = useNavigate();
+
+    const handleProductClick = (partId) => {
+        navigate(`/product/${partId}`);
+    };
+
     if (isLoading) return <div>Загрузка...</div>;
+    if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="catalog-container">
@@ -247,60 +471,81 @@ const AutoParts = () => {
                 <DropdownFilter
                     label="Категория"
                     options={categories}
-                    selected={categories.find((cat) => cat.value === filters.category)}
-                    onChange={(value) => handleCategoryChange(value.value)}
+                    selected={categories.find((cat) => cat.value === filters.category) || null}
+                    onChange={handleCategoryChange}
                     getOptionLabel={(option) => option.label}
                 />
-
                 <DropdownFilter
                     label="Марка авто"
                     options={brands}
-                    selected={filters.brand}
+                    selected={filters.brand || null}
                     onChange={(value) => handleFilterChange("brand", value)}
                     getOptionLabel={(option) => option.name}
                 />
-
                 {filters.brand && (
                     <DropdownFilter
                         label="Модель"
                         options={models}
-                        selected={filters.model}
+                        selected={filters.model || null}
                         onChange={(value) => handleFilterChange("model", value)}
                         getOptionLabel={(option) => option.name}
                     />
                 )}
-
                 {filters.model && (
                     <DropdownFilter
                         label="Поколение"
                         options={generations}
-                        selected={filters.generation}
+                        selected={filters.generation || null}
                         onChange={(value) => handleFilterChange("generation", value)}
                         getOptionLabel={(option) => option.year}
                     />
                 )}
-
                 {filters.generation && (
                     <DropdownFilter
                         label="Тип кузова"
                         options={bodyTypes}
-                        selected={filters.bodyType}
+                        selected={filters.bodyType || null}
                         onChange={(value) => handleFilterChange("bodyType", value)}
                         getOptionLabel={(option) => option.bodyTypeName}
                     />
                 )}
-
+                {renderCategoryFilters()}
+                <div className="price-filter">
+                    <label>Цена</label>
+                    <input
+                        type="number"
+                        name="priceFrom"
+                        value={filters.priceFrom}
+                        onChange={(e) => handlePriceChange("priceFrom", e.target.value)}
+                        placeholder="От"
+                        className="dropdown-search"
+                        min="0"
+                    />
+                    <input
+                        type="number"
+                        name="priceTo"
+                        value={filters.priceTo}
+                        onChange={(e) => handlePriceChange("priceTo", e.target.value)}
+                        placeholder="До"
+                        className="dropdown-search"
+                        min="0"
+                    />
+                </div>
                 <button className="reset-filters-button" onClick={resetFilters}>
                     Сбросить фильтры
                 </button>
             </aside>
-
             <main className="catalog-items">
                 <h1>{categoryName}</h1>
                 {parts.length === 0 ? (
                     <p>Нет товаров, соответствующих выбранным фильтрам.</p>
                 ) : (
-                    <ProductList products={currentParts} isAdmin={isAdmin} />
+                    <ProductList
+                        products={currentParts}
+                        categoryName={categoryName}
+                        onProductClick={handleProductClick}
+                        isAdmin={isAdmin}
+                    />
                 )}
                 {totalPages > 1 && (
                     <div className="pagination">
