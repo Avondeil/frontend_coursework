@@ -138,6 +138,22 @@
     color: #fff;
 }
 
+.dropdown-options li.selected {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.dropdown-options li.inactive {
+    color: #999;
+    cursor: not-allowed;
+    background-color: #f9f9f9;
+}
+
+.dropdown-options li.inactive:hover {
+    background-color: #f9f9f9;
+    color: #999;
+}
+
 .catalog-items {
     flex: 1;
     padding: 20px;

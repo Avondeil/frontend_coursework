@@ -5,59 +5,53 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
     const [search, setSearch] = useState("");
     const [range, setRange] = useState({ from: "", to: "" });
 
-    // Убедимся, что getOptionLabel всегда функция
     const getLabel = (option) => {
         if (typeof getOptionLabel === "function") {
             return getOptionLabel(option);
         }
-        return typeof option === "string" ? option : JSON.stringify(option); // Фоллбэк на строковое значение
+        return typeof option === "string" ? option : JSON.stringify(option);
     };
 
-    // Сброс значений при изменении пропса reset
     useEffect(() => {
         if (reset) {
             setSearch("");
             setRange({ from: "", to: "" });
+            onChange(null);
         }
-    }, [reset]);
+    }, [reset, onChange]);
 
-    // Фильтрация опций по поиску и диапазону
     const filteredOptions = options.filter((opt) => {
         const label = getLabel(opt);
+        const matchesSearch = typeof label === "string" && label.toLowerCase().includes(search.toLowerCase());
 
-        // Фильтрация по поиску
-        const matchesSearch =
-            typeof label === "string" && label.toLowerCase().includes(search.toLowerCase());
-
-        // Фильтрация по диапазону (если диапазон включен)
         if (enableRange) {
             const numericValue = parseFloat(label);
             const fromValid = !range.from || numericValue >= parseFloat(range.from);
             const toValid = !range.to || numericValue <= parseFloat(range.to);
-
             return matchesSearch && fromValid && toValid;
         }
 
         return matchesSearch;
     });
 
-    // Обработка изменения диапазона с проверкой на отрицательные значения
+    const validOptions = filteredOptions.filter((opt) => opt.isValid);
+    const invalidOptions = filteredOptions.filter((opt) => !opt.isValid);
+
+    const sortedOptions = [...validOptions, ...invalidOptions];
+
     const handleRangeChange = (key, value) => {
-        const sanitizedValue = value === "" ? "" : Math.max(0, Number(value)); // Замена отрицательных значений на 0
+        const sanitizedValue = value === "" ? "" : Math.max(0, Number(value));
         setRange((prev) => ({ ...prev, [key]: sanitizedValue }));
     };
 
     return (
         <div className="dropdown">
             <div className="dropdown-label" onClick={() => setIsOpen(!isOpen)}>
-                <span>
-                    {label}: {selected ? getLabel(selected) : "Не выбрано"}
-                </span>
+                <span>{label}: {selected ? getLabel({ value: selected }) : "Не выбрано"}</span>
                 <span className={`arrow ${isOpen ? "open" : ""}`}></span>
             </div>
             {isOpen && (
                 <div className="dropdown-menu">
-                    {/* Поле для поиска */}
                     <input
                         type="text"
                         placeholder="Поиск..."
@@ -65,7 +59,6 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
                         onChange={(e) => setSearch(e.target.value)}
                         className="dropdown-search"
                     />
-                    {/* Поля для диапазона (только если enableRange=true) */}
                     {enableRange && (
                         <div className="dropdown-range">
                             <input
@@ -86,15 +79,17 @@ const DropdownFilter = ({ label, options, selected, onChange, getOptionLabel, en
                             />
                         </div>
                     )}
-                    {/* Список опций */}
                     <ul className="dropdown-options">
-                        {filteredOptions.length > 0 ? (
-                            filteredOptions.map((option, index) => (
+                        {sortedOptions.length > 0 ? (
+                            sortedOptions.map((option, index) => (
                                 <li
                                     key={index}
+                                    className={option.isValid ? (selected === option.value ? "selected" : "") : "inactive"}
                                     onClick={() => {
-                                        onChange(option);
-                                        setIsOpen(false);
+                                        if (option.isValid) {
+                                            onChange(option.value);
+                                            setIsOpen(false);
+                                        }
                                     }}
                                 >
                                     {getLabel(option)}

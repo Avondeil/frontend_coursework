@@ -10,6 +10,7 @@ const Catalog = () => {
     const { category } = useParams();
     const [filters, setFilters] = useState({});
     const [products, setProducts] = useState([]);
+    const [parametersData, setParametersData] = useState([]);
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [priceRange, setPriceRange] = useState({ priceFrom: "", priceTo: "" });
@@ -33,7 +34,6 @@ const Catalog = () => {
 
             if (!token) {
                 setIsAdmin(false);
-                setIsLoading(false);
                 return;
             }
 
@@ -69,51 +69,97 @@ const Catalog = () => {
     }, []);
 
     useEffect(() => {
-        const fetchParameters = async () => {
+        const fetchData = async () => {
+            setIsLoading(true);
             try {
-                let url = "";
+                // Загрузка параметров для фильтров
+                let paramsUrl = "";
                 if (category === "autoboxes") {
-                    url = `${API_BASE_URL}/AutoboxParameters`;
+                    paramsUrl = `${API_BASE_URL}/AutoboxParameters`;
                 } else if (category === "roof_racks") {
-                    url = `${API_BASE_URL}/RoofRackParameters`;
+                    paramsUrl = `${API_BASE_URL}/RoofRackParameters`;
                 } else if (category === "parts_accessories") {
-                    url = `${API_BASE_URL}/SparePartsParameters`;
+                    paramsUrl = `${API_BASE_URL}/SparePartsParameters`;
                 }
 
-                if (url) {
-                    const response = await axios.get(url);
-                    const data = response.data;
-
-                    const unique = (key) =>
-                        [...new Set(data.map((item) => item[key]?.toString()).filter(Boolean))].sort();
-
-                    setParameterOptions({
-                        dimensionsMm: unique("dimensionsMm"),
-                        lengthCm: unique("lengthCm"),
-                        loadKg: unique("loadKg"),
-                        volumeL: unique("volumeL"),
-                        openingSystem: unique("openingSystem"),
-                        color: unique("color"),
-                        countryOfOrigin: unique("countryOfOrigin"),
-                        material: unique("material"),
-                        mountingType: unique("mountingType"),
-                        crossbarShape: unique("crossbarShape"),
-                    });
-                    setProducts(data);
+                let parametersData = [];
+                if (paramsUrl) {
+                    const paramsResponse = await axios.get(paramsUrl);
+                    parametersData = paramsResponse.data;
+                    setParametersData(parametersData); // Сохраняем данные параметров
+                    updateParameterOptions(parametersData, {});
                 }
+
+                // Загрузка продуктов для отображения
+                const productsUrl = `${API_BASE_URL}/Parts/ByCategory/${category}`;
+                const productsResponse = await axios.get(productsUrl);
+                const productsData = productsResponse.data;
+                setProducts(productsData);
+                setFilteredProducts(productsData);
             } catch (error) {
-                console.error("Ошибка загрузки параметров:", error);
-                setError("Ошибка загрузки параметров");
+                console.error("Ошибка загрузки данных:", error);
+                setError("Ошибка загрузки данных");
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        fetchParameters();
+        fetchData();
     }, [category]);
+
+    const updateParameterOptions = (data, currentFilters) => {
+        const filteredData = data.filter((item) => {
+            return Object.entries(currentFilters).every(([key, value]) => {
+                if (!value) return true;
+                return item[key]?.toString() === value.toString();
+            });
+        });
+
+        const allOptions = {
+            dimensionsMm: [...new Set(data.map((item) => item.dimensionsMm?.toString()).filter(Boolean))].sort(),
+            lengthCm: [...new Set(data.map((item) => item.lengthCm?.toString()).filter(Boolean))].sort(),
+            loadKg: [...new Set(data.map((item) => item.loadKg?.toString()).filter(Boolean))].sort(),
+            volumeL: [...new Set(data.map((item) => item.volumeL?.toString()).filter(Boolean))].sort(),
+            openingSystem: [...new Set(data.map((item) => item.openingSystem?.toString()).filter(Boolean))].sort(),
+            color: [...new Set(data.map((item) => item.color?.toString()).filter(Boolean))].sort(),
+            countryOfOrigin: [...new Set(data.map((item) => item.countryOfOrigin?.toString()).filter(Boolean))].sort(),
+            material: [...new Set(data.map((item) => item.material?.toString()).filter(Boolean))].sort(),
+            mountingType: [...new Set(data.map((item) => item.mountingType?.toString()).filter(Boolean))].sort(),
+            crossbarShape: [...new Set(data.map((item) => item.crossbarShape?.toString()).filter(Boolean))].sort(),
+        };
+
+        const validOptions = {
+            dimensionsMm: [...new Set(filteredData.map((item) => item.dimensionsMm?.toString()).filter(Boolean))].sort(),
+            lengthCm: [...new Set(filteredData.map((item) => item.lengthCm?.toString()).filter(Boolean))].sort(),
+            loadKg: [...new Set(filteredData.map((item) => item.loadKg?.toString()).filter(Boolean))].sort(),
+            volumeL: [...new Set(filteredData.map((item) => item.volumeL?.toString()).filter(Boolean))].sort(),
+            openingSystem: [...new Set(filteredData.map((item) => item.openingSystem?.toString()).filter(Boolean))].sort(),
+            color: [...new Set(filteredData.map((item) => item.color?.toString()).filter(Boolean))].sort(),
+            countryOfOrigin: [...new Set(filteredData.map((item) => item.countryOfOrigin?.toString()).filter(Boolean))].sort(),
+            material: [...new Set(filteredData.map((item) => item.material?.toString()).filter(Boolean))].sort(),
+            mountingType: [...new Set(filteredData.map((item) => item.mountingType?.toString()).filter(Boolean))].sort(),
+            crossbarShape: [...new Set(filteredData.map((item) => item.crossbarShape?.toString()).filter(Boolean))].sort(),
+        };
+
+        setParameterOptions(
+            Object.keys(allOptions).reduce((acc, key) => ({
+                ...acc,
+                [key]: allOptions[key].map((option) => ({
+                    value: option,
+                    isValid: validOptions[key].includes(option),
+                })),
+            }), {})
+        );
+    };
 
     const fetchFilteredProducts = async () => {
         try {
-            const queryParams = new URLSearchParams(filters).toString();
-            const url = `${API_BASE_URL}/Parts/ByCategory/${category}?${queryParams}`;
+            // Исключаем параметры со значением null или undefined
+            const validFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, value]) => value != null && value !== "")
+            );
+            const queryParams = new URLSearchParams(validFilters).toString();
+            const url = `${API_BASE_URL}/Parts/ByCategory/${category}${queryParams ? `?${queryParams}` : ""}`;
             const response = await axios.get(url);
 
             const filteredByPrice = response.data.filter((product) => {
@@ -124,6 +170,7 @@ const Catalog = () => {
             });
 
             setFilteredProducts(filteredByPrice);
+            updateParameterOptions(parametersData, validFilters);
             setCurrentPage(1);
         } catch (error) {
             console.error("Ошибка загрузки продуктов:", error);
@@ -132,8 +179,23 @@ const Catalog = () => {
     };
 
     useEffect(() => {
-        fetchFilteredProducts();
-    }, [filters, priceRange]);
+        if (Object.keys(filters).length > 0 || priceRange.priceFrom || priceRange.priceTo) {
+            fetchFilteredProducts();
+        } else {
+            const fetchInitialProducts = async () => {
+                try {
+                    const url = `${API_BASE_URL}/Parts/ByCategory/${category}`;
+                    const response = await axios.get(url);
+                    setFilteredProducts(response.data);
+                    updateParameterOptions(parametersData, {}); // Обновляем опции при сбросе фильтров
+                } catch (error) {
+                    console.error("Ошибка загрузки продуктов:", error);
+                    setError("Ошибка загрузки продуктов");
+                }
+            };
+            fetchInitialProducts();
+        }
+    }, [filters, priceRange, products, parametersData]);
 
     const resetFilters = () => {
         setFilters({});
@@ -152,7 +214,7 @@ const Catalog = () => {
                 options={params[key] || []}
                 selected={filters[key]}
                 onChange={(value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-                getOptionLabel={(opt) => opt}
+                getOptionLabel={(opt) => opt.value}
                 enableRange={enableRange}
                 reset={resetFiltersTrigger}
             />
