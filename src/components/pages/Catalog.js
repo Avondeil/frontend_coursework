@@ -14,7 +14,6 @@ const Catalog = () => {
     const [parameterOptions, setParameterOptions] = useState({});
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [priceRange, setPriceRange] = useState({ priceFrom: "", priceTo: "" });
-    const [resetFiltersTrigger, setResetFiltersTrigger] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -86,7 +85,7 @@ const Catalog = () => {
                 if (paramsUrl) {
                     const paramsResponse = await axios.get(paramsUrl);
                     parametersData = paramsResponse.data;
-                    setParametersData(parametersData); // Сохраняем данные параметров
+                    setParametersData(parametersData);
                     updateParameterOptions(parametersData, {});
                 }
 
@@ -154,7 +153,6 @@ const Catalog = () => {
 
     const fetchFilteredProducts = async () => {
         try {
-            // Исключаем параметры со значением null или undefined
             const validFilters = Object.fromEntries(
                 Object.entries(filters).filter(([_, value]) => value != null && value !== "")
             );
@@ -179,7 +177,11 @@ const Catalog = () => {
     };
 
     useEffect(() => {
-        if (Object.keys(filters).length > 0 || priceRange.priceFrom || priceRange.priceTo) {
+        // Проверяет, нужно ли запускать фильтрацию
+        const hasFilters = Object.values(filters).some((value) => value != null && value !== "");
+        const hasPriceRange = priceRange.priceFrom || priceRange.priceTo;
+
+        if (hasFilters || hasPriceRange) {
             fetchFilteredProducts();
         } else {
             const fetchInitialProducts = async () => {
@@ -187,7 +189,7 @@ const Catalog = () => {
                     const url = `${API_BASE_URL}/Parts/ByCategory/${category}`;
                     const response = await axios.get(url);
                     setFilteredProducts(response.data);
-                    updateParameterOptions(parametersData, {}); // Обновляем опции при сбросе фильтров
+                    updateParameterOptions(parametersData, {});
                 } catch (error) {
                     console.error("Ошибка загрузки продуктов:", error);
                     setError("Ошибка загрузки продуктов");
@@ -195,12 +197,11 @@ const Catalog = () => {
             };
             fetchInitialProducts();
         }
-    }, [filters, priceRange, products, parametersData]);
+    }, [filters, priceRange, category, parametersData]);
 
     const resetFilters = () => {
         setFilters({});
         setPriceRange({ priceFrom: "", priceTo: "" });
-        setResetFiltersTrigger((prev) => !prev);
         setCurrentPage(1);
     };
 
@@ -212,11 +213,10 @@ const Catalog = () => {
                 key={key}
                 label={label}
                 options={params[key] || []}
-                selected={filters[key]}
+                selected={filters[key] || ""} // Явно передает пустую строку при сбросе
                 onChange={(value) => setFilters((prev) => ({ ...prev, [key]: value }))}
                 getOptionLabel={(opt) => opt.value}
                 enableRange={enableRange}
-                reset={resetFiltersTrigger}
             />
         );
 
@@ -319,10 +319,10 @@ const Catalog = () => {
                     />
                     <input
                         type="number"
-                        name="priceTo"
                         value={priceRange.priceTo}
                         onChange={(e) => setPriceRange((prev) => ({ ...prev, priceTo: e.target.value }))}
                         placeholder="До"
+                        name="priceTo"
                         className="dropdown-search"
                         min="0"
                     />
