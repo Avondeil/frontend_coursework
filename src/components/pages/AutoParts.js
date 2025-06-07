@@ -53,7 +53,6 @@ const AutoParts = () => {
     const validCategories = ["all", "autoboxes", "roof_racks", "parts_accessories"];
     const categoryName = categoryMap[filters.category] || "Категория не найдена";
 
-    // Отмена текущего запроса при выборе другого фильтра
     useEffect(() => {
         return () => {
             if (abortControllerRef.current) {
@@ -62,7 +61,6 @@ const AutoParts = () => {
         };
     }, []);
 
-    // Получение данных пользователя
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -90,7 +88,6 @@ const AutoParts = () => {
         fetchUserData();
     }, []);
 
-    // Загрузка марок авто
     useEffect(() => {
         const fetchBrands = async () => {
             try {
@@ -104,7 +101,6 @@ const AutoParts = () => {
         fetchBrands();
     }, []);
 
-    // Загрузка моделей
     useEffect(() => {
         const fetchModels = async () => {
             if (filters.brand?.brandId) {
@@ -124,7 +120,6 @@ const AutoParts = () => {
         fetchModels();
     }, [filters.brand]);
 
-    // Загрузка поколений
     useEffect(() => {
         const fetchGenerations = async () => {
             if (filters.model?.modelId) {
@@ -143,7 +138,6 @@ const AutoParts = () => {
         fetchGenerations();
     }, [filters.model]);
 
-    // Загрузка типов кузова
     useEffect(() => {
         const fetchBodyTypes = async () => {
             if (filters.generation?.generationId) {
@@ -161,7 +155,6 @@ const AutoParts = () => {
         fetchBodyTypes();
     }, [filters.generation]);
 
-    // Загрузка параметров категории
     useEffect(() => {
         const fetchParameters = async () => {
             if (filters.category === "all") {
@@ -206,7 +199,6 @@ const AutoParts = () => {
         }
     }, [filters.categoryParams, parametersData]);
 
-    // Основная функция загрузки товаров
     const fetchParts = async () => {
         try {
             if (abortControllerRef.current) {
@@ -221,22 +213,18 @@ const AutoParts = () => {
 
             const params = {};
 
-            // Параметры авто
             if (brand?.brandId) params.brandId = brand.brandId;
             if (model?.modelId) params.modelId = model.modelId;
             if (generation?.generationId) params.generationId = generation.generationId;
             if (bodyType?.bodyTypeId) params.bodyTypeId = bodyType.bodyTypeId;
 
-            // Параметры категории
             Object.entries(categoryParams).forEach(([key, value]) => {
                 if (value) params[key] = value;
             });
 
-            // Ценовой диапазон
             if (priceFrom) params.priceFrom = priceFrom;
             if (priceTo) params.priceTo = priceTo;
 
-            // Запрос на получение запчастей
             const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, {
                 params,
                 signal: controller.signal
@@ -255,7 +243,6 @@ const AutoParts = () => {
         }
     };
 
-    // Вызов fetchParts при изменении основных фильтров
     useEffect(() => {
         fetchParts();
     }, [
@@ -383,8 +370,8 @@ const AutoParts = () => {
     };
 
     const resetFilters = () => {
-        setFilters({
-            category: "all",
+        setFilters(prev => ({
+            ...prev,
             brand: null,
             model: null,
             generation: null,
@@ -392,12 +379,10 @@ const AutoParts = () => {
             categoryParams: {},
             priceFrom: "",
             priceTo: "",
-        });
+        }));
         setModels([]);
         setGenerations([]);
         setBodyTypes([]);
-        setParametersData([]);
-        setParameterOptions({});
         setCurrentPage(1);
     };
 
@@ -464,7 +449,6 @@ const AutoParts = () => {
         }
     };
 
-    // Пагинация
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentParts = parts.slice(indexOfFirstItem, indexOfLastItem);
