@@ -389,7 +389,7 @@ const AutoParts = () => {
     };
 
     const resetFilters = () => {
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
             brand: null,
             model: null,
@@ -399,6 +399,7 @@ const AutoParts = () => {
             priceFrom: "",
             priceTo: "",
         }));
+        setSortOrder("");
         setModels([]);
         setGenerations([]);
         setBodyTypes([]);
