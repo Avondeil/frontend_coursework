@@ -234,6 +234,11 @@ const AutoParts = () => {
             setCurrentPage(1);
         } catch (error) {
             if (axios.isCancel(error)) {
+            } else if (error.response && error.response.status === 404) {
+                setParts([]);
+                setFilteredParts([]);
+                setError(null);
+                setCurrentPage(1);
             } else {
                 setError("Ошибка загрузки товаров");
                 setParts([]);
