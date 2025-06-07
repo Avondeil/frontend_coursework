@@ -122,16 +122,20 @@
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .price-input {
-    width: 100px;
+    flex: 1;
+    width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);
     font-size: 0.9em;
     color: #555;
+    box-sizing: border-box;
 }
 
 .price-input:focus {
@@ -240,7 +244,6 @@
 .product-title:hover {
     color: #007bff;
     cursor: pointer;
-    margin: 0;
 }
 
 .product-type {
@@ -375,16 +378,16 @@
 
 .pagination button {
     padding: 12px 20px;
-    background-color: #007bff;
+    background-color: #333;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
 .pagination button:hover {
-    background-color: #0056b3;
+    background-color: #555;
 }
 
 .pagination button:disabled {
@@ -393,7 +396,7 @@
 }
 
 .pagination button.active {
-    background-color: #0056b3;
+    background-color: #007bff;
     font-weight: bold;
 }
 
@@ -463,12 +466,17 @@
     }
 
     .price-input-container {
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 10px;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .price-input {
+        flex: 1;
         width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 
