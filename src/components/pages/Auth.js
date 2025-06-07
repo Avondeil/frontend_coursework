@@ -4,6 +4,7 @@ import { useNotification } from "../contexts/NotificationContext";
 import { API_BASE_URL } from '../../config';
 import axios from "axios";
 import '../styles/Auth.css';
+import VerificationModal from "../ui/VerificationModal";
 
 const Auth = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -13,10 +14,12 @@ const Auth = () => {
         rememberMe: false,
     });
     const [error, setError] = useState(null);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [tempToken, setTempToken] = useState(null);
 
     const navigate = useNavigate();
-    const location = useLocation(); // Получаем текущий путь (например, корзина)
-    const { showNotification } = useNotification(); // Хук для уведомлений
+    const location = useLocation();
+    const { showNotification } = useNotification();
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -45,7 +48,14 @@ const Auth = () => {
                 },
             });
 
-            const { token } = response.data;
+            const { token, requiresVerification } = response.data;
+
+            if (requiresVerification) {
+                setTempToken(token);
+                setShowVerificationModal(true);
+                return;
+            }
+
             if (formData.rememberMe) {
                 localStorage.setItem("token", token);
             } else {
@@ -56,11 +66,58 @@ const Auth = () => {
                 message: 'Успешный вход!',
             });
 
-            // Получаем путь редиректа из query параметра и перенаправляем
             const redirectPath = new URLSearchParams(location.search).get('redirect') || '/profile';
             navigate(redirectPath);
         } catch (error) {
             setError(error.response?.data?.message || "Ошибка авторизации");
+        }
+    };
+
+    const handleConfirmCode = async (code) => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/verify-code`, {
+                email: formData.email,
+                code,
+                tempToken,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            setShowVerificationModal(false);
+            if (formData.rememberMe) {
+                localStorage.setItem("token", tempToken);
+            } else {
+                sessionStorage.setItem("token", tempToken);
+            }
+            showNotification({
+                type: 'success',
+                message: 'Успешный вход!',
+            });
+
+            const redirectPath = new URLSearchParams(location.search).get('redirect') || '/profile';
+            navigate(redirectPath);
+        } catch (error) {
+            throw new Error("Неверный код");
+        }
+    };
+
+    const handleResendCode = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/resend-code`, {
+                email: formData.email,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            showNotification({
+                type: 'success',
+                message: 'Код отправлен повторно!',
+            });
+        } catch (error) {
+            setError(error.response?.data?.message || "Ошибка отправки кода");
         }
     };
 
@@ -120,6 +177,13 @@ const Auth = () => {
                     <button type="button" onClick={handleRegistration}>Регистрация</button>
                 </div>
             </form>
+            {showVerificationModal && (
+                <VerificationModal
+                    email={formData.email}
+                    onConfirm={handleConfirmCode}
+                    onResend={handleResendCode}
+                />
+            )}
         </div>
     );
 };

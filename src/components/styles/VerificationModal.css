@@ -1,0 +1,172 @@
+.vm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.vm-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.vm-modal-content h2 {
+    font-family: 'Roboto', sans-serif;
+    color: #2c3e50;
+    font-size: 2.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.vm-modal-content p {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.vm-code-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.vm-code-inputs input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 1.5em;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #f0f4f8;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.vm-code-inputs input:focus {
+    border-color: #007bff;
+    background-color: #fff;
+    outline: none;
+}
+
+.vm-code-inputs input.vm-error {
+    border-color: red;
+}
+
+.vm-button {
+    flex: 1;
+    height: 70px;
+    min-width: 200px;
+    background: #007bff;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1em;
+    font-weight: 500;
+    line-height: 0.8;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+    padding: 15px 40px;
+}
+
+.vm-button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.vm-resend-link {
+    color: #007bff;
+    font-size: 0.9em;
+    text-decoration: underline;
+    cursor: pointer;
+    margin: 10px;
+    transition: color 0.3s ease;
+}
+
+.vm-resend-link:hover {
+    color: #0056b3;
+}
+
+.vm-resend-link.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.vm-error-message {
+    color: red;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .vm-modal-content {
+        width: 85%;
+        padding: 15px;
+    }
+
+    .vm-modal-content h2 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+
+    .vm-code-inputs input {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3em;
+    }
+
+    .vm-button {
+        height: 60px;
+        min-width: 180px;
+        font-size: 1em;
+        padding: 12px 30px;
+    }
+
+    .vm-resend-link {
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    .vm-modal-content h2 {
+        font-size: 1.5em;
+    }
+
+    .vm-code-inputs {
+        gap: 5px;
+    }
+
+    .vm-code-inputs input {
+        width: 30px;
+        height: 30px;
+        font-size: 1.1em;
+    }
+
+    .vm-button {
+        height: 50px;
+        min-width: 160px;
+        font-size: 0.9em;
+        padding: 10px 25px;
+    }
+
+    .vm-resend-link {
+        font-size: 0.8em;
+    }
+}
