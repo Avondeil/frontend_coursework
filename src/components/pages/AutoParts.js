@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Catalog.css";
@@ -34,10 +34,14 @@ const AutoParts = () => {
     const [parameterOptions, setParameterOptions] = useState({});
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isPartsLoading, setIsPartsLoading] = useState(false);
     const [isParametersLoading, setIsParametersLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
+    const abortControllerRef = useRef(null);
+    const priceTimeoutRef = useRef(null);
 
     const categoryMap = {
         all: "Все запчасти",
@@ -49,11 +53,22 @@ const AutoParts = () => {
     const validCategories = ["all", "autoboxes", "roof_racks", "parts_accessories"];
     const categoryName = categoryMap[filters.category] || "Категория не найдена";
 
+    // Отмена текущего запроса при выборе другого фильтра
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
+
+    // Получение данных пользователя
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
             if (!token) {
                 setIsAdmin(false);
+                setIsLoading(false);
                 return;
             }
             try {
@@ -75,6 +90,7 @@ const AutoParts = () => {
         fetchUserData();
     }, []);
 
+    // Загрузка марок авто
     useEffect(() => {
         const fetchBrands = async () => {
             try {
@@ -88,6 +104,7 @@ const AutoParts = () => {
         fetchBrands();
     }, []);
 
+    // Загрузка моделей
     useEffect(() => {
         const fetchModels = async () => {
             if (filters.brand?.brandId) {
@@ -107,6 +124,7 @@ const AutoParts = () => {
         fetchModels();
     }, [filters.brand]);
 
+    // Загрузка поколений
     useEffect(() => {
         const fetchGenerations = async () => {
             if (filters.model?.modelId) {
@@ -125,6 +143,7 @@ const AutoParts = () => {
         fetchGenerations();
     }, [filters.model]);
 
+    // Загрузка типов кузова
     useEffect(() => {
         const fetchBodyTypes = async () => {
             if (filters.generation?.generationId) {
@@ -142,6 +161,7 @@ const AutoParts = () => {
         fetchBodyTypes();
     }, [filters.generation]);
 
+    // Загрузка параметров категории
     useEffect(() => {
         const fetchParameters = async () => {
             if (filters.category === "all") {
@@ -185,6 +205,83 @@ const AutoParts = () => {
             updateParameterOptions(parametersData, filters.categoryParams);
         }
     }, [filters.categoryParams, parametersData]);
+
+    // Основная функция загрузки товаров
+    const fetchParts = async () => {
+        try {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
+            const controller = new AbortController();
+            abortControllerRef.current = controller;
+
+            setIsPartsLoading(true);
+            const { category, brand, model, generation, bodyType, categoryParams, priceFrom, priceTo } = filters;
+
+            const params = {};
+
+            // Параметры авто
+            if (brand?.brandId) params.brandId = brand.brandId;
+            if (model?.modelId) params.modelId = model.modelId;
+            if (generation?.generationId) params.generationId = generation.generationId;
+            if (bodyType?.bodyTypeId) params.bodyTypeId = bodyType.bodyTypeId;
+
+            // Параметры категории
+            Object.entries(categoryParams).forEach(([key, value]) => {
+                if (value) params[key] = value;
+            });
+
+            // Ценовой диапазон
+            if (priceFrom) params.priceFrom = priceFrom;
+            if (priceTo) params.priceTo = priceTo;
+
+            // Запрос на получение запчастей
+            const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, {
+                params,
+                signal: controller.signal
+            });
+
+            setParts(response.data || []);
+            setCurrentPage(1);
+        } catch (error) {
+            if (axios.isCancel(error)) {
+            } else {
+                setError("Ошибка загрузки товаров");
+                setParts([]);
+            }
+        } finally {
+            setIsPartsLoading(false);
+        }
+    };
+
+    // Вызов fetchParts при изменении основных фильтров
+    useEffect(() => {
+        fetchParts();
+    }, [
+        filters.category,
+        filters.brand,
+        filters.model,
+        filters.generation,
+        filters.bodyType,
+        filters.categoryParams
+    ]);
+
+    useEffect(() => {
+        if (priceTimeoutRef.current) {
+            clearTimeout(priceTimeoutRef.current);
+        }
+
+        priceTimeoutRef.current = setTimeout(() => {
+            fetchParts();
+        }, 500);
+
+        return () => {
+            if (priceTimeoutRef.current) {
+                clearTimeout(priceTimeoutRef.current);
+            }
+        };
+    }, [filters.priceFrom, filters.priceTo]);
 
     const updateParameterOptions = (data, currentFilters) => {
         if (!Array.isArray(data) || !data.length) {
@@ -232,56 +329,6 @@ const AutoParts = () => {
 
         setParameterOptions(newParameterOptions);
     };
-
-    const fetchParts = async () => {
-        try {
-            setIsLoading(true);
-            const { category, brand, model, generation, bodyType, categoryParams, priceFrom, priceTo } = filters;
-            const validCategoryParams = Object.fromEntries(
-                Object.entries(categoryParams).filter(([_, value]) => value != null && value !== "")
-            );
-            const params = {
-                brandId: brand?.brandId,
-                modelId: model?.modelId,
-                generationId: generation?.generationId,
-                bodyTypeId: bodyType?.bodyTypeId,
-                ...validCategoryParams,
-            };
-
-            const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, { params });
-            let filteredParts = response.data || [];
-
-            if (priceFrom || priceTo) {
-                filteredParts = filteredParts.filter((part) => {
-                    const price = part.price;
-                    const from = parseFloat(priceFrom) || 0;
-                    const to = parseFloat(priceTo) || Infinity;
-                    return price >= from && price <= to;
-                });
-            }
-
-            setParts(filteredParts);
-            setCurrentPage(1);
-        } catch (error) {
-            setError("Ошибка загрузки деталей");
-            setParts([]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchParts();
-    }, [
-        filters.category,
-        filters.brand,
-        filters.model,
-        filters.generation,
-        filters.bodyType,
-        filters.categoryParams,
-        filters.priceFrom,
-        filters.priceTo,
-    ]);
 
     const handleFilterChange = (filterType, selectedOption) => {
         setFilters((prev) => {
@@ -417,6 +464,7 @@ const AutoParts = () => {
         }
     };
 
+    // Пагинация
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentParts = parts.slice(indexOfFirstItem, indexOfLastItem);
@@ -429,29 +477,51 @@ const AutoParts = () => {
     };
 
     const renderPagination = () => {
+        if (totalPages <= 1) return null;
+
         const pages = [];
         const delta = 2;
+        const left = currentPage - delta;
+        const right = currentPage + delta;
 
-        pages.push(1);
-        if (currentPage - delta > 2) pages.push("...");
-        for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
-            pages.push(i);
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= left && i <= right)) {
+                pages.push(i);
+            } else if (i === left - 1 || i === right + 1) {
+                pages.push("...");
+            }
         }
-        if (currentPage + delta < totalPages - 1) pages.push("...");
-        if (totalPages > 1) pages.push(totalPages);
 
-        return pages.map((page, index) =>
-            page === "..." ? (
-                <span key={index}>...</span>
-            ) : (
+        return (
+            <div className="pagination">
                 <button
-                    key={index}
-                    onClick={() => handlePageChange(page)}
-                    className={currentPage === page ? "active" : ""}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
                 >
-                    {page}
+                    &lt;
                 </button>
-            )
+
+                {pages.map((page, index) => (
+                    page === "..." ? (
+                        <span key={index} className="ellipsis">...</span>
+                    ) : (
+                        <button
+                            key={index}
+                            onClick={() => handlePageChange(page)}
+                            className={currentPage === page ? "active" : ""}
+                        >
+                            {page}
+                        </button>
+                    )
+                ))}
+
+                <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    &gt;
+                </button>
+            </div>
         );
     };
 
@@ -537,26 +607,20 @@ const AutoParts = () => {
             </aside>
             <main className="catalog-items">
                 <h1>{categoryName}</h1>
-                {parts.length === 0 ? (
+                {isPartsLoading ? (
+                    <div className="loading-indicator">Загрузка товаров...</div>
+                ) : parts.length === 0 ? (
                     <p>Нет товаров, соответствующих выбранным фильтрам.</p>
                 ) : (
-                    <ProductList
-                        products={currentParts}
-                        categoryName={categoryName}
-                        onProductClick={handleProductClick}
-                        isAdmin={isAdmin}
-                    />
-                )}
-                {totalPages > 1 && (
-                    <div className="pagination">
-                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                            &lt;
-                        </button>
+                    <>
+                        <ProductList
+                            products={currentParts}
+                            categoryName={categoryName}
+                            onProductClick={handleProductClick}
+                            isAdmin={isAdmin}
+                        />
                         {renderPagination()}
-                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                            &gt;
-                        </button>
-                    </div>
+                    </>
                 )}
             </main>
         </div>
