@@ -25,11 +25,13 @@ const AutoParts = () => {
         { value: "parts_accessories", label: "Запчасти и аксессуары" },
     ]);
 
+    const [sortOrder, setSortOrder] = useState("");
     const [brands, setBrands] = useState([]);
     const [models, setModels] = useState([]);
     const [generations, setGenerations] = useState([]);
     const [bodyTypes, setBodyTypes] = useState([]);
     const [parts, setParts] = useState([]);
+    const [filteredParts, setFilteredParts] = useState([]);
     const [parametersData, setParametersData] = useState([]);
     const [parameterOptions, setParameterOptions] = useState({});
     const [isAdmin, setIsAdmin] = useState(false);
@@ -209,7 +211,7 @@ const AutoParts = () => {
             abortControllerRef.current = controller;
 
             setIsPartsLoading(true);
-            const { category, brand, model, generation, bodyType, categoryParams, priceFrom, priceTo } = filters;
+            const { category, brand, model, generation, bodyType, categoryParams } = filters;
 
             const params = {};
 
@@ -222,21 +224,20 @@ const AutoParts = () => {
                 if (value) params[key] = value;
             });
 
-            if (priceFrom) params.priceFrom = priceFrom;
-            if (priceTo) params.priceTo = priceTo;
-
             const response = await axios.get(`${API_BASE_URL}/Parts/ByCategory/${category}`, {
                 params,
                 signal: controller.signal
             });
 
             setParts(response.data || []);
+            setFilteredParts(response.data || []);
             setCurrentPage(1);
         } catch (error) {
             if (axios.isCancel(error)) {
             } else {
                 setError("Ошибка загрузки товаров");
                 setParts([]);
+                setFilteredParts([]);
             }
         } finally {
             setIsPartsLoading(false);
@@ -260,7 +261,25 @@ const AutoParts = () => {
         }
 
         priceTimeoutRef.current = setTimeout(() => {
-            fetchParts();
+            const { priceFrom, priceTo } = filters;
+            const from = parseFloat(priceFrom) || 0;
+            const to = parseFloat(priceTo) || Infinity;
+
+            let filtered = parts.filter((item) => {
+                const price = parseFloat(item.price) || 0;
+                return price >= from && price <= to;
+            });
+
+            if (sortOrder) {
+                filtered = [...filtered].sort((a, b) => {
+                    const priceA = parseFloat(a.price) || 0;
+                    const priceB = parseFloat(b.price) || 0;
+                    return sortOrder === "по возрастанию" ? priceA - priceB : priceB - priceA;
+                });
+            }
+
+            setFilteredParts(filtered);
+            setCurrentPage(1);
         }, 500);
 
         return () => {
@@ -268,7 +287,7 @@ const AutoParts = () => {
                 clearTimeout(priceTimeoutRef.current);
             }
         };
-    }, [filters.priceFrom, filters.priceTo]);
+    }, [filters.priceFrom, filters.priceTo, parts, sortOrder]);
 
     const updateParameterOptions = (data, currentFilters) => {
         if (!Array.isArray(data) || !data.length) {
@@ -451,8 +470,8 @@ const AutoParts = () => {
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentParts = parts.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(parts.length / itemsPerPage);
+    const currentParts = filteredParts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredParts.length / itemsPerPage);
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
@@ -566,23 +585,36 @@ const AutoParts = () => {
                 {renderCategoryFilters()}
                 <div className="price-filter">
                     <label>Цена</label>
-                    <input
-                        type="number"
-                        name="priceFrom"
-                        value={filters.priceFrom}
-                        onChange={(e) => handlePriceChange("priceFrom", e.target.value)}
-                        placeholder="От"
-                        className="dropdown-search"
-                        min="0"
-                    />
-                    <input
-                        type="number"
-                        name="priceTo"
-                        value={filters.priceTo}
-                        onChange={(e) => handlePriceChange("priceTo", e.target.value)}
-                        placeholder="До"
-                        className="dropdown-search"
-                        min="0"
+                    <div className="price-input-container">
+                        <input
+                            type="number"
+                            name="priceFrom"
+                            value={filters.priceFrom}
+                            onChange={(e) => handlePriceChange("priceFrom", e.target.value)}
+                            placeholder="От"
+                            className="price-input"
+                            min="0"
+                        />
+                        <input
+                            type="number"
+                            name="priceTo"
+                            value={filters.priceTo}
+                            onChange={(e) => handlePriceChange("priceTo", e.target.value)}
+                            placeholder="До"
+                            className="price-input"
+                            min="0"
+                        />
+                    </div>
+                    <DropdownFilter
+                        label="Сортировка"
+                        options={[
+                            { value: "", label: "Без сортировки" },
+                            { value: "по возрастанию", label: "Цена: по возрастанию" },
+                            { value: "по убыванию", label: "Цена: по убыванию" },
+                        ]}
+                        selected={sortOrder}
+                        onChange={(value) => setSortOrder(value)}
+                        getOptionLabel={(option) => option.label}
                     />
                 </div>
                 <button className="reset-filters-button" onClick={resetFilters}>
@@ -593,7 +625,7 @@ const AutoParts = () => {
                 <h1>{categoryName}</h1>
                 {isPartsLoading ? (
                     <div className="loading-indicator">Загрузка товаров...</div>
-                ) : parts.length === 0 ? (
+                ) : filteredParts.length === 0 ? (
                     <p>Нет товаров, соответствующих выбранным фильтрам.</p>
                 ) : (
                     <>
