@@ -14,6 +14,12 @@ const VerificationModal = ({ email, onConfirm, onResend }) => {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        if (inputRefs.current[0]) {
+            inputRefs.current[0].focus();
+        }
+    }, []);
+
     const handleInputChange = (index, value) => {
         if (error) setError(false);
         if (/^\d$/.test(value) || value === "") {
