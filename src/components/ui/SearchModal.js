@@ -5,10 +5,12 @@ import { API_BASE_URL } from '../../config';
 import '../styles/SearchModal.css';
 
 const SearchModal = ({ isOpen, toggleModal }) => {
-    const [searchTerm, setSearchTerm] = useState(""); // Строка поиска
-    const [parts, setParts] = useState([]); // Все запчасти
-    const [filteredParts, setFilteredParts] = useState([]); // Отфильтрованные запчасти
-
+    // Строка поиска
+    const [searchTerm, setSearchTerm] = useState("");
+    // Все запчасти
+    const [parts, setParts] = useState([]);
+    // Отфильтрованные запчасти
+    const [filteredParts, setFilteredParts] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,7 +19,6 @@ const SearchModal = ({ isOpen, toggleModal }) => {
         } else {
             document.body.classList.remove('no-scroll');
         }
-
         return () => document.body.classList.remove('no-scroll');
     }, [isOpen]);
 
@@ -27,7 +28,6 @@ const SearchModal = ({ isOpen, toggleModal }) => {
             .get(`${API_BASE_URL}/Parts/ByCategory/all`)
             .then((response) => {
                 setParts(response.data);
-                setFilteredParts(response.data); // Изначально показываем все запчасти
             })
             .catch((error) => {
                 console.error("Ошибка при загрузке запчастей:", error);
@@ -36,13 +36,13 @@ const SearchModal = ({ isOpen, toggleModal }) => {
 
     // Фильтрация запчастей по строке поиска
     useEffect(() => {
-        if (searchTerm === "") {
-            setFilteredParts(parts); // Если строка поиска пуста, показываем все запчасти
-        } else {
+        if (searchTerm.length > 0) {
             const filtered = parts.filter(part =>
                 part.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
             setFilteredParts(filtered);
+        } else {
+            setFilteredParts([]);
         }
     }, [searchTerm, parts]);
 
@@ -54,8 +54,8 @@ const SearchModal = ({ isOpen, toggleModal }) => {
 
     // Очистить строку поиска при закрытии модального окна
     const handleCloseModal = () => {
-        setSearchTerm(''); // Очистить текст из поля ввода
-        toggleModal(); // Закрыть модальное окно
+        setSearchTerm('');
+        toggleModal();
     };
 
     if (!isOpen) return null;
@@ -73,9 +73,10 @@ const SearchModal = ({ isOpen, toggleModal }) => {
                     />
                     <button className="close-modal" onClick={handleCloseModal}>×</button>
                 </div>
-
                 <div className="parts-list">
-                    {filteredParts.length === 0 ? (
+                    {filteredParts.length === 0 && searchTerm.length === 0 ? (
+                        <p>Введите запрос для поиска запчастей</p>
+                    ) : filteredParts.length === 0 ? (
                         <p>По введенным данным запчастей не найдено</p>
                     ) : (
                         filteredParts.map((part) => (

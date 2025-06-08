@@ -10,56 +10,66 @@
     justify-content: center;
     align-items: flex-start;
     z-index: 999;
-    padding-top: 20px; /* Открытие сверху */
+    padding-top: 20px;
 }
 
 .search-modal-content {
-    background: white;
-    padding: 20px;
+    background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+    padding: 24px;
     width: 80%;
     max-width: 800px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
     position: relative;
+    font-family: Arial, sans-serif;
 }
 
-/* Контейнер для строки поиска и кнопки */
+/* Поле ввода */
 .search-input-container {
     display: flex;
     align-items: center;
     width: 100%;
+    margin-bottom: 16px;
 }
 
-/* Строка поиска */
 .search-input {
     flex: 1;
-    padding: 10px;
+    padding: 10px 12px;
     font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    height: 30px; /* Меньшая высота для выравнивания */
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Кнопка закрытия */
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
 .close-modal {
-    background: red;
+    background: var(--danger-color);
     color: white;
     border: none;
-    padding: 5px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 16px; /* Меньший размер текста */
-    width: 40px;  /* Уменьшаем размер кнопки */
-    height: 40px; /* Уменьшаем размер кнопки */
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 10px; /* Отступ между полем ввода и кнопкой */
+    margin-left: 10px;
+    font-family: Arial, sans-serif;
+    line-height: 40px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
-/* При наведении меняем цвет */
 .close-modal:hover {
-    background-color: #ff4d4d;
+    background: var(--danger-hover);
+    transform: translateY(-1px);
 }
 
 /* Список запчастей */
@@ -69,17 +79,25 @@
     margin-top: 10px;
 }
 
+.parts-list p {
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: left;
+    font-family: Arial, sans-serif;
+}
+
 .part-item {
     display: flex;
     align-items: center;
     padding: 15px;
-    border-bottom: 1px solid #f1f1f1;
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
 .part-item:hover {
-    background-color: #f0f0f0;
+    background-color: var(--gray-bg);
 }
 
 .part-image {
@@ -87,16 +105,83 @@
     height: 80px;
     object-fit: cover;
     margin-right: 15px;
+    border-radius: 6px;
 }
 
 .part-text h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
 }
 
 .part-text p {
     margin: 5px 0 0;
     font-size: 14px;
-    color: #666;
+    color: var(--text-color);
+    opacity: 0.7;
+    font-family: Arial, sans-serif;
+}
+
+/* Для устройств с экраном до 768px */
+@media (max-width: 768px) {
+    .search-modal-content {
+        padding: 16px;
+        width: 90%;
+    }
+
+    .search-input {
+        font-size: 14px;
+    }
+
+    .part-text h3 {
+        font-size: 16px;
+    }
+
+    .part-text p {
+        font-size: 12px;
+    }
+
+    .part-image {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Для устройств с экраном до 480px */
+@media (max-width: 480px) {
+    .search-modal-content {
+        padding: 12px;
+        width: 95%;
+    }
+
+    .search-input {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    .close-modal {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        line-height: 32px;
+    }
+
+    .part-item {
+        padding: 10px;
+    }
+
+    .part-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .part-text h3 {
+        font-size: 14px;
+    }
+
+    .part-text p {
+        font-size: 10px;
+    }
 }
