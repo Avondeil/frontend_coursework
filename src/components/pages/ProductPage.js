@@ -6,12 +6,16 @@ import '../styles/ProductPage.css';
 import AddToCartButton from "../ui/AddToCartButton";
 
 const ProductPage = () => {
-    const { partId } = useParams(); // Получаем partId из URL
+    // Получаем partId из URL
+    const { partId } = useParams();
     const [product, setProduct] = useState(null);
     const [productDetails, setProductDetails] = useState(null);
-    const [productType, setProductType] = useState(""); // Переменная для хранения типа товара
-    const [detailsError, setDetailsError] = useState(false); // Ошибка для характеристик
-    const [productError, setProductError] = useState(false); // Ошибка для отсутствующего товара
+    // Переменная для хранения типа товара
+    const [productType, setProductType] = useState("");
+    // Ошибка для характеристик
+    const [detailsError, setDetailsError] = useState(false);
+    // Ошибка для отсутствующего товара
+    const [productError, setProductError] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
@@ -155,6 +159,21 @@ const ProductPage = () => {
                                 </>
                             )}
                         </ul>
+                    )}
+                </div>
+
+                <div className="product-compatibility-section">
+                    <h3>Совместимость с автомобилями</h3>
+                    {product.compatibilities && product.compatibilities.length > 0 ? (
+                        <ul>
+                            {product.compatibilities.map((comp, index) => (
+                                <li key={index}>
+                                    <span>{comp.brandName} {comp.modelName}</span> ({comp.generationYear}, {comp.bodytypeName})
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>Совместимость не указана.</p>
                     )}
                 </div>
 

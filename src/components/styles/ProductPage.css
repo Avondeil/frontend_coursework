@@ -5,7 +5,6 @@
     text-align: center;
 }
 
-/* Контейнер страницы продукта */
 .product-page-container {
     max-width: 1200px;
     margin: 15vh auto;
@@ -15,7 +14,6 @@
     border-radius: 8px;
 }
 
-/* Заголовок продукта и изображение */
 .product-header {
     display: flex;
     align-items: center;
@@ -53,15 +51,15 @@
     color: #333;
 }
 
-/* Секции для характеристик и описания */
 .product-details {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
     margin-bottom: 30px;
 }
 
 .product-info-section,
+.product-compatibility-section,
 .product-description-section {
     background-color: #fafafa;
     padding: 20px;
@@ -70,34 +68,38 @@
 }
 
 .product-info-section h3,
+.product-compatibility-section h3,
 .product-description-section h3 {
     font-size: 24px;
     margin-bottom: 15px;
     color: #333;
 }
 
-.product-info-section ul {
+.product-info-section ul,
+.product-compatibility-section ul {
     list-style-type: none;
 }
 
-.product-info-section li {
+.product-info-section li,
+.product-compatibility-section li {
     font-size: 18px;
     color: #555;
     margin-bottom: 10px;
 }
 
-.product-info-section li span {
+.product-info-section li span,
+.product-compatibility-section li span {
     font-weight: bold;
     color: #333;
 }
 
+.product-compatibility-section p,
 .product-description-section p {
     font-size: 18px;
     color: #555;
     line-height: 1.6;
 }
 
-/* Кнопки */
 .action-buttons {
     display: flex;
     justify-content: space-between;
@@ -130,15 +132,12 @@
     background-color: #0056b3;
 }
 
-/* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
-    /* Контейнер страницы продукта */
     .product-page-container {
         padding: 10px;
         margin: 0 auto;
     }
 
-    /* Заголовок продукта и изображение */
     .product-header {
         flex-direction: column;
         align-items: center;
@@ -176,24 +175,27 @@
     }
 
     .product-info-section,
+    .product-compatibility-section,
     .product-description-section {
         padding: 15px;
     }
 
     .product-info-section h3,
+    .product-compatibility-section h3,
     .product-description-section h3 {
         font-size: 20px;
     }
 
-    .product-info-section li {
+    .product-info-section li,
+    .product-compatibility-section li {
         font-size: 16px;
     }
 
+    .product-compatibility-section p,
     .product-description-section p {
         font-size: 16px;
     }
 
-    /* Кнопки */
     .action-buttons {
         flex-direction: column;
         align-items: center;
