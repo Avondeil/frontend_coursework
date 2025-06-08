@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNotification } from "../contexts/NotificationContext";
 import { API_BASE_URL } from '../../config';
 import '../styles/Auth.css';
+import VerificationModal from "../ui/VerificationModal";
 
 const Registration = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const Registration = () => {
     });
 
     const [error, setError] = useState(null);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
     const { showNotification } = useNotification();
     const navigate = useNavigate();
 
@@ -71,19 +73,47 @@ const Registration = () => {
         setError(null);
         if (!validateForm()) return;
         try {
-            const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+            await axios.post(`${API_BASE_URL}/auth/register`, {
                 fullName: formData.fullName,
                 email: formData.email,
                 password: formData.password,
                 phone: formData.phone,
             });
-            if (response.status === 200) {
-                showNotification({ type: 'success', message: 'Успешная регистрация!' });
-                navigate('/auth');
-            }
+            setShowVerificationModal(true);
         } catch (err) {
             setError(err.response?.data?.message || 'Ошибка регистрации');
             showNotification({ type: 'error', message: err.response?.data?.message || 'Ошибка регистрации' });
+        }
+    };
+
+    const handleConfirmCode = async (code) => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/confirm-register`, {
+                email: formData.email,
+                code,
+                fullName: formData.fullName,
+                phone: formData.phone,
+                password: formData.password,
+            });
+            setShowVerificationModal(false);
+            showNotification({ type: 'success', message: 'Успешная регистрация!' });
+            navigate('/auth');
+        } catch (error) {
+            throw new Error("Неверный код");
+        }
+    };
+
+    const handleResendCode = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/register`, {
+                fullName: formData.fullName,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+            });
+            showNotification({ type: 'success', message: 'Код отправлен повторно!' });
+        } catch (error) {
+            setError(error.response?.data?.message || "Ошибка отправки кода");
         }
     };
 
@@ -130,6 +160,13 @@ const Registration = () => {
                         <button type="submit">Зарегистрироваться</button>
                     </div>
                 </form>
+                {showVerificationModal && (
+                    <VerificationModal
+                        email={formData.email}
+                        onConfirm={handleConfirmCode}
+                        onResend={handleResendCode}
+                    />
+                )}
             </div>
         </div>
     );

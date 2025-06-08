@@ -15,7 +15,6 @@ const Auth = () => {
     });
     const [error, setError] = useState(null);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
-    const [tempToken, setTempToken] = useState(null);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -42,32 +41,15 @@ const Auth = () => {
         }
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/auth/login`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+                email: formData.email,
+                password: formData.password,
+            }, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-
-            const { token, requiresVerification } = response.data;
-
-            if (requiresVerification) {
-                setTempToken(token);
-                setShowVerificationModal(true);
-                return;
-            }
-
-            if (formData.rememberMe) {
-                localStorage.setItem("token", token);
-            } else {
-                sessionStorage.setItem("token", token);
-            }
-            showNotification({
-                type: 'success',
-                message: 'Успешный вход!',
-            });
-
-            const redirectPath = new URLSearchParams(location.search).get('redirect') || '/profile';
-            navigate(redirectPath);
+            setShowVerificationModal(true);
         } catch (error) {
             setError(error.response?.data?.message || "Ошибка авторизации");
         }
@@ -75,22 +57,22 @@ const Auth = () => {
 
     const handleConfirmCode = async (code) => {
         try {
-            await axios.post(`${API_BASE_URL}/auth/verify-code`, {
+            const response = await axios.post(`${API_BASE_URL}/auth/confirm-login`, {
                 email: formData.email,
                 code,
-                tempToken,
+                rememberMe: formData.rememberMe
             }, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-
-            setShowVerificationModal(false);
+            const { token } = response.data;
             if (formData.rememberMe) {
-                localStorage.setItem("token", tempToken);
+                localStorage.setItem("token", token);
             } else {
-                sessionStorage.setItem("token", tempToken);
+                sessionStorage.setItem("token", token);
             }
+            setShowVerificationModal(false);
             showNotification({
                 type: 'success',
                 message: 'Успешный вход!',
@@ -105,8 +87,9 @@ const Auth = () => {
 
     const handleResendCode = async () => {
         try {
-            await axios.post(`${API_BASE_URL}/auth/resend-code`, {
+            const response = await axios.post(`${API_BASE_URL}/auth/login`, {
                 email: formData.email,
+                password: formData.password,
             }, {
                 headers: {
                     "Content-Type": "application/json",
