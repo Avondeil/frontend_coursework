@@ -5,6 +5,7 @@
     padding: 20px;
     margin-top: 8vh;
     min-height: calc(80vh - 100px);
+    background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%);
     font-family: Arial, sans-serif;
 }
 
