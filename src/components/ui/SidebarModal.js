@@ -3,9 +3,12 @@ import { CiMail } from "react-icons/ci";
 import '../styles/SidebarModal.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaTelegramPlane, FaVk, FaYoutube } from "react-icons/fa";
+import axios from 'axios';
+import { API_BASE_URL } from '../../config';
 
 const SidebarModal = ({ isOpen, toggleModal }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || sessionStorage.getItem('token'));
+    const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
 
     // Эффект для отслеживания токена
@@ -13,6 +16,36 @@ const SidebarModal = ({ isOpen, toggleModal }) => {
         const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
         setToken(storedToken);
     }, [isOpen]);
+
+    // Проверка статуса администратора
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (!token) {
+                setIsAdmin(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (response.data?.statusAdmin) {
+                    setIsAdmin(true);
+                } else {
+                    setIsAdmin(false);
+                }
+            } catch (err) {
+                console.error("Ошибка при получении данных пользователя:", err);
+                setIsAdmin(false);
+            }
+        };
+
+        fetchUserData();
+    }, [token]);
 
     // Блокировка прокрутки при открытии модального окна
     useEffect(() => {
@@ -51,6 +84,9 @@ const SidebarModal = ({ isOpen, toggleModal }) => {
                         <Link to="/catalog" onClick={toggleModal} className="catalog-link">Каталог</Link>
                     </li>
                     <li>
+                        <Link to="/compare" onClick={toggleModal}>Сравнить запчасти</Link>
+                    </li>
+                    <li>
                         <a
                             className="profile-link"
                             onClick={handleProfileClick}
@@ -59,12 +95,14 @@ const SidebarModal = ({ isOpen, toggleModal }) => {
                             Личный кабинет
                         </a>
                     </li>
-                    <li>
-                        <Link to="/cart" onClick={toggleModal}>
-                            <img src="/basket.svg" height="24px" width="24px" alt="Icon" />
-                            Корзина
-                        </Link>
-                    </li>
+                    {!isAdmin && (
+                        <li>
+                            <Link to="/cart" onClick={toggleModal}>
+                                <img src="/basket.svg" height="24px" width="24px" alt="Icon" />
+                                Корзина
+                            </Link>
+                        </li>
+                    )}
                 </ul>
                 <div className="sidebar-info">
                     <ul className="sidebar-links">
