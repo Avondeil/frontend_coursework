@@ -1,21 +1,30 @@
 .typeList-container {
-    text-align: center;
-    padding: 20px;
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+    font-family: Arial, sans-serif;
 }
 
 .catalog-heading {
-    font-size: clamp(35px, 40%, 38px);
+    font-size: clamp(28px, 4vw, 32px);
     color: #333;
     margin-bottom: 20px;
     font-weight: bold;
+    font-family: Arial, sans-serif;
 }
 
 .typeList-container p {
-    font-size: clamp(18px, 40%, 25px);
-    margin-bottom: 20px;
-    font-weight: bold;
+    font-size: clamp(16px, 2vw, 18px);
     color: #555;
+    margin-bottom: 15px;
+    font-family: Arial, sans-serif;
+}
+
+.typeList-container p:last-child {
+    font-weight: normal;
 }
 
 .catalog-types {
@@ -26,41 +35,68 @@
     scroll-snap-type: x mandatory;
 }
 
+.catalog-types::-webkit-scrollbar {
+    display: none;
+}
+
+.catalog-types {
+    scrollbar-width: none;
+}
+
 .catalog-item {
     flex: 0 0 calc(100% - 20px);
     max-width: 300px;
     padding: 10px;
     margin: 0 auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px; /* Округлые края */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
     scroll-snap-align: center;
     text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.catalog-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.catalog-item:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.catalog-item:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .catalog-item img {
     width: 100%;
-    height: auto;
-    border-radius: 5px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 5px; /* Округлые края */
 }
 
-@media (min-width: 768px) {
-    .catalog-items {
-        flex-wrap: wrap;
-        overflow-x: hidden;
-        justify-content: center;
-    }
-
-    .catalog-item {
-        flex: 0 1 30%;
-        max-width: none;
-    }
+.catalog-item h4 {
+    font-size: clamp(18px, 2vw, 20px);
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0 5px;
+    font-family: Arial, sans-serif;
 }
 
-
-.catalog-item {
-    max-width: 500px;
-    text-decoration: none;
-    text-align: center;
+.catalog-item:hover h4 {
+    color: #007bff;
 }
 
+.catalog-item p {
+    font-size: clamp(12px, 2vw, 14px);
+    color: #777;
+    font-family: Arial, sans-serif;
+}
 
 .catalog-description {
     visibility: hidden;
@@ -73,30 +109,71 @@
     opacity: 1;
 }
 
-.catalog-item:hover {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: box-shadow 0.3s ease;
-        border-radius: 5px;
+/* для устройств с маленьким экраном */
+@media (max-width: 768px) {
+    .typeList-container {
+        padding: 20px 10px;
+    }
+
+    .catalog-heading {
+        font-size: clamp(24px, 5vw, 28px);
+    }
+
+    .typeList-container p {
+        font-size: clamp(14px, 3vw, 16px);
+    }
+
+    .catalog-item {
+        flex: 0 0 calc(100% - 20px);
+        max-width: 300px;
+    }
+
+    .catalog-item h4 {
+        font-size: clamp(16px, 3vw, 18px);
+    }
+
+    .catalog-item p {
+        font-size: clamp(11px, 3vw, 13px);
+    }
 }
 
-.catalog-item:visited {
-    color: black;
+@media (max-width: 480px) {
+    .catalog-heading {
+        font-size: clamp(20px, 6vw, 24px);
+    }
+
+    .typeList-container p {
+        font-size: clamp(12px, 3vw, 14px);
+    }
+
+    .catalog-item {
+        flex: 0 0 calc(100% - 20px);
+        max-width: 250px;
+        padding: 10px;
+    }
+
+    .catalog-item img {
+        height: 150px;
+    }
+
+    .catalog-item h4 {
+        font-size: clamp(14px, 3vw, 16px);
+    }
+
+    .catalog-item p {
+        font-size: clamp(10px, 3vw, 12px);
+    }
 }
 
+@media (min-width: 768px) {
+    .catalog-types {
+        flex-wrap: wrap;
+        overflow-x: hidden;
+        justify-content: center;
+    }
 
-.catalog-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-}
-
-.catalog-item h4 {
-    font-size: clamp(25px, 40%, 30px);
-    font-weight: bold;
-    margin: 10px 0 5px;
-}
-
-.catalog-item p {
-    font-size: 14px;
-    color: #777;
+    .catalog-item {
+        flex: 0 1 calc(33.33% - 20px);
+        max-width: 350px;
+    }
 }
