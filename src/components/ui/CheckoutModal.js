@@ -5,11 +5,12 @@ import { API_BASE_URL } from '../../config';
 import { useCart } from '../contexts/CartContext'; // Хук для работы с корзиной
 import axios from 'axios';
 
-const CheckoutModal = ({ isOpen, onClose }) => {
-    const { cartItems, clearCart } = useCart(); // Получаем данные корзины и метод для ее очистки
+const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
     const [deliveryAddress, setDeliveryAddress] = useState('');
     const [loading, setLoading] = useState(false);
     const { showNotification } = useNotification(); // Хук для уведомлений
+    const { removeSelectedItems } = useCart(); // Получаем функцию для удаления только выбранных товаров
+
     const handleAddressChange = (e) => {
         setDeliveryAddress(e.target.value);
     };
@@ -22,8 +23,8 @@ const CheckoutModal = ({ isOpen, onClose }) => {
             return;
         }
 
-        if (cartItems.length === 0) {
-            showNotification({ type: 'error', message: 'Корзина пуста. Добавьте товары для оформления заказа.' });
+        if (selectedItems.length === 0) {
+            showNotification({ type: 'error', message: 'Нет выбранных товаров для оформления.' });
             return;
         }
 
@@ -36,10 +37,10 @@ const CheckoutModal = ({ isOpen, onClose }) => {
             return;
         }
 
-        // Формируем данные для отправки на сервер
+        // Формируем данные для отправки на сервер, используя только выбранные товары
         const orderRequest = {
             deliveryAddress,
-            orderItems: cartItems.map((item) => ({
+            orderItems: selectedItems.map((item) => ({
                 partId: item.partId,
                 quantity: item.quantity,
                 price: item.price,
@@ -54,9 +55,10 @@ const CheckoutModal = ({ isOpen, onClose }) => {
                 },
             });
 
-            // Если ответ успешен, показываем сообщение об успешном оформлении заказа
+            // Если ответ успешен, показываем сообщение и удаляем только выбранные товары
             showNotification({ type: 'success', message: response.data.message || 'Заказ успешно оформлен!' });
-            clearCart(); // Очищаем корзину
+            removeSelectedItems(); // Удаляем только выбранные товары из корзины
+            onClose(); // Закрываем модальное окно после успешного оформления
         } catch (err) {
             // Обработка ошибок
             if (err.response && err.response.status === 401) {

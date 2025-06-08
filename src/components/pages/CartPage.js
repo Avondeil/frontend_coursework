@@ -8,15 +8,24 @@ import '../styles/CartPage.css';
 import { useNotification } from "../contexts/NotificationContext";
 
 const CartPage = () => {
-    const { cartItems, removeFromCart, updateQuantity } = useCart();
+    const { cartItems, removeFromCart, updateQuantity, toggleSelection } = useCart();
     const { showNotification } = useNotification();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const closeModal = () => setIsModalOpen(false);
 
     const handleCheckout = async () => {
+        const selectedItems = cartItems.filter((item) => item.isSelected);
+        if (selectedItems.length === 0) {
+            showNotification({
+                type: 'error',
+                message: 'Выберите хотя бы один товар для оформления.',
+            });
+            return;
+        }
+
         const unavailableItems = [];
-        for (const item of cartItems) {
+        for (const item of selectedItems) {
             try {
                 const response = await axios.get(`${API_BASE_URL}/Parts/${item.partId}`);
                 const product = response.data;
@@ -73,9 +82,20 @@ const CartPage = () => {
             <div className="cart-items">
                 {cartItems.map((item) => (
                     <div key={item.partId} className="cart-item">
-                        <img src={item.imageUrl} alt={item.name} className="cart-item-image" />
+                        <input
+                            type="checkbox"
+                            className="cart-item-checkbox"
+                            checked={item.isSelected && item.stockQuantity > 0}
+                            onChange={() => toggleSelection(item.partId)}
+                            disabled={item.stockQuantity <= 0}
+                        />
+                        <Link to={`/product/${item.partId}`}>
+                            <img src={item.imageUrl} alt={item.name} className="cart-item-image" />
+                        </Link>
                         <div className="cart-item-details">
-                            <h3>{item.name}</h3>
+                            <h3>
+                                <Link to={`/product/${item.partId}`} className="cart-item-link">{item.name}</Link>
+                            </h3>
                             <p>{item.description}</p>
                             <p>Цена: {item.price} руб.</p>
                             <p>
@@ -98,17 +118,23 @@ const CartPage = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <button onClick={() => removeFromCart(item.partId)}>Удалить</button>
+                                <button className="remove-button" onClick={() => removeFromCart(item.partId)}>Удалить</button>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
             <div className="cart-summary">
-                <h3>Итого: {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)} руб.</h3>
+                <h3>Итого: {cartItems
+                    .filter((item) => item.isSelected)
+                    .reduce((acc, item) => acc + item.price * item.quantity, 0)} руб.</h3>
                 <button onClick={handleCheckout} className="checkout-btn">Оформить заказ</button>
             </div>
-            <CheckoutModal isOpen={isModalOpen} onClose={closeModal} />
+            <CheckoutModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                selectedItems={cartItems.filter((item) => item.isSelected)}
+            />
         </div>
     );
 };

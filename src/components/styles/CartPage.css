@@ -29,6 +29,7 @@
 /* Стили для отдельного товара в корзине */
 .cart-item {
     display: flex;
+    align-items: center;
     gap: 20px;
     border: 1px solid #ddd;
     padding: 15px;
@@ -43,6 +44,18 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* Стили для чекбокса выбора товара */
+.cart-item-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.cart-item-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 /* Стили для изображения товара */
 .cart-item img {
     width: 120px;
@@ -55,6 +68,16 @@
     flex-grow: 1;
     font-size: 14px;
     color: #555;
+}
+
+/* Стили для ссылки на товар */
+.cart-item-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.cart-item-link:hover {
+    text-decoration: underline;
 }
 
 /* Действия с товаром */
@@ -76,6 +99,21 @@
 }
 
 .cart-item-actions button:hover {
+    background-color: #c0392b;
+}
+
+/* Стили для кнопки удаления для отсутствующих товаров */
+.remove-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.remove-button:hover {
     background-color: #c0392b;
 }
 

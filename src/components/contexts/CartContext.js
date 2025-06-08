@@ -26,36 +26,70 @@ export const CartProvider = ({ children }) => {
 
     useEffect(() => {
         const checkStock = async () => {
-            const updatedCart = [];
-            const removedItems = [];
+            let updatedCart = [...cartItems];
+            let hasChanges = false;
 
             for (const item of cartItems) {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/Parts/${item.partId}`);
                     const product = response.data;
 
-                    if (product.stockQuantity > 0) {
-                        updatedCart.push({ ...item, stockQuantity: product.stockQuantity });
-                    } else {
-                        removedItems.push(item);
+                    if (item.price !== product.price) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, price: product.price }
+                                : cartItem
+                        );
+                        hasChanges = true;
+                        showNotification({
+                            type: 'info',
+                            message: `Цена товара "${item.name}" обновлена до ${product.price} руб.`,
+                        });
+                    }
+
+                    if (product.stockQuantity <= 0 && item.stockQuantity > 0) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, stockQuantity: 0, isSelected: false, price: product.price }
+                                : cartItem
+                        );
+                        hasChanges = true;
+                        showNotification({
+                            type: 'error',
+                            message: `Товар "${item.name}" стал недоступен и исключён из оформления.`,
+                        });
+                    } else if (product.stockQuantity > 0 && item.stockQuantity <= 0) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, stockQuantity: product.stockQuantity, isSelected: true, price: product.price }
+                                : cartItem
+                        );
+                        hasChanges = true;
+                        showNotification({
+                            type: 'success',
+                            message: `Товар "${item.name}" снова в наличии и выбран для оформления.`,
+                        });
+                    } else if (product.stockQuantity > 0) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, stockQuantity: product.stockQuantity, price: product.price }
+                                : cartItem
+                        );
                     }
                 } catch (error) {
                     console.error(`Ошибка проверки товара ${item.partId}:`, error);
                 }
             }
 
-            if (removedItems.length > 0) {
+            if (hasChanges) {
                 setCartItems(updatedCart);
-                removedItems.forEach((item) =>
-                    showNotification({
-                        type: 'error',
-                        message: `Товар "${item.name}" был удален из корзины, так как его нет в наличии.`,
-                    })
-                );
             }
         };
 
-        checkStock();
+        checkStock(); // Запуск при монтировании
+        const intervalId = setInterval(checkStock, 30000); // Проверка каждые 30 секунд
+
+        return () => clearInterval(intervalId); // Очистка при размонтировании
     }, [cartItems, showNotification]);
 
     useEffect(() => {
@@ -73,7 +107,7 @@ export const CartProvider = ({ children }) => {
                         : cartItem
                 );
             }
-            return [...prevItems, { ...item, quantity: 1 }];
+            return [...prevItems, { ...item, quantity: 1, isSelected: true }];
         });
     };
 
@@ -89,6 +123,20 @@ export const CartProvider = ({ children }) => {
         );
     };
 
+    const toggleSelection = (partId) => {
+        setCartItems((prevItems) =>
+            prevItems.map((item) =>
+                item.partId === partId
+                    ? { ...item, isSelected: !item.isSelected && item.stockQuantity > 0 }
+                    : item
+            )
+        );
+    };
+
+    const removeSelectedItems = () => {
+        setCartItems((prevItems) => prevItems.filter((item) => !item.isSelected));
+    };
+
     const clearCart = () => {
         setCartItems([]);
         localStorage.removeItem('cart');
@@ -98,7 +146,18 @@ export const CartProvider = ({ children }) => {
     const isInCart = (partId) => cartItems.some((item) => item.partId === partId);
 
     return (
-        <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}>
+        <CartContext.Provider
+            value={{
+                cartItems,
+                addToCart,
+                removeFromCart,
+                updateQuantity,
+                clearCart,
+                toggleSelection,
+                isInCart,
+                removeSelectedItems,
+            }}
+        >
             {children}
         </CartContext.Provider>
     );
