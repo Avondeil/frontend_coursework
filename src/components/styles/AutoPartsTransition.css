@@ -5,62 +5,93 @@
     align-items: center;
     margin: 10px;
     height: 50vh;
-    background: linear-gradient(to right, #00c6ff, #0072ff);
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     text-align: center;
     padding: 40px 20px;
-    border-radius: 15px;
+    border-radius: 10px;
     box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 .auto-parts-transition-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #fff;
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: bold;
+    color: #333;
     margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-family: Arial, sans-serif;
 }
 
 .auto-parts-transition-description {
-    font-size: 18px;
-    color: #fff;
+    font-size: clamp(14px, 2vw, 18px);
+    color: #333;
     margin-bottom: 30px;
     line-height: 1.6;
+    font-family: Arial, sans-serif;
 }
 
 .auto-parts-transition-button {
-    padding: 12px 25px;
-    font-size: 18px;
-    background-color: #ffffff;
-    color: #333;
+    padding: 12px 20px;
+    font-size: clamp(14px, 2vw, 16px);
+    background-color: #007bff;
+    color: #fff;
     border: none;
-    border-radius: 50px;
+    border-radius: 5px; /* Округлые края */
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .auto-parts-transition-button:hover {
     background-color: #0056b3;
-    color: white;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.auto-parts-transition-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .auto-parts-transition-button:focus {
     outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+/* для устройств с маленьким экраном */
 @media (max-width: 768px) {
     .auto-parts-transition-content {
-        height: 65vh;
+        height: auto;
+        padding: 20px 10px;
     }
 
     .auto-parts-transition-title {
-        font-size: 24px;
+        font-size: clamp(20px, 5vw, 24px);
+    }
+
+    .auto-parts-transition-description {
+        font-size: clamp(12px, 3vw, 14px);
     }
 
     .auto-parts-transition-button {
-        font-size: 14px;
-        padding: 8px 15px;
+        font-size: clamp(12px, 3vw, 14px);
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auto-parts-transition-title {
+        font-size: clamp(18px, 6vw, 20px);
+    }
+
+    .auto-parts-transition-description {
+        font-size: clamp(11px, 3vw, 13px);
+    }
+
+    .auto-parts-transition-button {
+        font-size: clamp(11px, 3vw, 13px);
+        padding: 8px 12px;
     }
 }
