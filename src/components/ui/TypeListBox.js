@@ -7,7 +7,7 @@ const TypeListBox = () => {
     const navigate = useNavigate();
 
     const handleCategoryClick = (category) => {
-        navigate(`/catalog/${category}`);
+        navigate('/autoparts', { state: { category } });
     };
 
     return (
