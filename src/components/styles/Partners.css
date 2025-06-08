@@ -7,11 +7,14 @@
     text-align: center;
     width: 100%;
     background: #f8f8f8;
+    font-family: Arial, sans-serif;
 }
 
 .partners-container h1 {
     padding: 20px;
     color: #333;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
 }
 
 .partners-container p {
@@ -19,6 +22,7 @@
     color: #555;
     text-align: center;
     margin: 10px;
+    font-family: Arial, sans-serif;
 }
 
 #company_text {
@@ -26,6 +30,7 @@
     color: #555;
     text-align: center;
     margin: 10px;
+    font-family: Arial, sans-serif;
 }
 
 .partners-item img {
@@ -67,6 +72,7 @@
     align-items: center;
 }
 
+/* для устройств с большим экраном */
 @media (min-width: 768px) {
     .partners-list {
         flex-wrap: wrap;
