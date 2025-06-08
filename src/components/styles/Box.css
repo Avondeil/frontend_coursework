@@ -6,11 +6,23 @@
     overflow: hidden;
 }
 
+.box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Затемнение фона */
+}
+
 .box h1 {
     position: absolute;
     top: 30%;
     color: white;
     font-size: clamp(25px, 4vw, 45px);
+    font-family: Arial, sans-serif;
+    font-weight: bold;
     left: 30px;
     background: none;
     line-height: 1.2;
@@ -31,12 +43,14 @@
 }
 
 .button-container button {
-    background-color: #ffffff;
-    color: #333;
+    background-color: #007bff;
+    color: #fff;
+    padding: 2px;
     border: none;
+    font-family: Arial, sans-serif;
     font-weight: bold;
-    border-radius: 50px; /* Округлые края */
-    font-size: 15px;
+    border-radius: 5px; /* Округлые края */
+    font-size: clamp(14px, 2vw, 16px);
     text-align: center;
     width: clamp(150px, 3vw, 230px);
     height: 50px;
@@ -44,17 +58,23 @@
     cursor: pointer;
     min-width: 120px;
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .button-container button:hover {
     background-color: #0056b3;
-    color: white;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button-container button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .button-container button:focus {
     outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 /* для устройств с маленьким экраном */
@@ -70,7 +90,9 @@
         top: 0;
         left: 0;
         text-align: center;
-        font-size: clamp(23px, 6vw, 28px);
+        font-size: clamp(20px, 5vw, 24px);
+        font-family: Arial, sans-serif;
+        font-weight: bold;
     }
 
     .button-container {
@@ -84,8 +106,23 @@
 
     .button-container button {
         margin: 5px;
-        width: clamp(120px, 40%, 180px);
-        font-size: 12px;
+        width: clamp(120px, 40%, 160px);
         height: 40px;
+        font-size: clamp(12px, 3vw, 14px);
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+    }
+}
+
+@media (max-width: 480px) {
+    .box h1 {
+        font-size: clamp(18px, 6vw, 22px);
+    }
+
+    .button-container button {
+        width: clamp(100px, 35%, 140px);
+        height: 35px;
+        font-size: clamp(11px, 3vw, 13px);
+        margin: 5px;
     }
 }
