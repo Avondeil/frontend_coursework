@@ -6,11 +6,9 @@ const ProductCategorySelection = () => {
     const navigate = useNavigate();
 
     const handleCategoryClick = (category) => {
-        if (category != "autoparts")
-        navigate(`/catalog/${category}`);
-        else navigate("/autoparts")
-
+        navigate('/autoparts', { state: { category } });
     };
+
 
     return (
         <div className="product-category-selection-container">
@@ -69,7 +67,7 @@ const ProductCategorySelection = () => {
                     </p>
                     <button
                         className="product-category-selection-button"
-                        onClick={() => handleCategoryClick("autoparts")}
+                        onClick={() => handleCategoryClick("all")}
                     >
                         Перейти в каталог
                     </button>

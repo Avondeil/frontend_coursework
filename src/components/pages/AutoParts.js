@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../styles/Catalog.css";
 import { API_BASE_URL } from "../../config";
@@ -55,13 +55,29 @@ const AutoParts = () => {
     const validCategories = ["all", "autoboxes", "roof_racks", "parts_accessories"];
     const categoryName = categoryMap[filters.category] || "Категория не найдена";
 
+    const location = useLocation();
+
     useEffect(() => {
+        const categoryFromState = location.state?.category;
+        if (categoryFromState && validCategories.includes(categoryFromState)) {
+            setFilters((prev) => ({
+                ...prev,
+                category: categoryFromState,
+                brand: null,
+                model: null,
+                generation: null,
+                bodyType: null,
+                categoryParams: {},
+                priceFrom: "",
+                priceTo: "",
+            }));
+        }
         return () => {
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
         };
-    }, []);
+    }, [location.state]);
 
     useEffect(() => {
         const fetchUserData = async () => {
