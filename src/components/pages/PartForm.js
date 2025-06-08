@@ -284,7 +284,7 @@ const PartForm = () => {
             <h2 className="form-title">{partId ? 'Редактировать запчасть' : 'Добавить запчасть'}</h2>
 
             <div className="form-group">
-                <label className="form-label">Название *</label>
+                <label className="form-label">Название <span className="required">*</span></label>
                 <input type="text" name="name" value={part.name || ''} onChange={handleChange} className="form-input" required />
             </div>
 
@@ -294,7 +294,7 @@ const PartForm = () => {
             </div>
 
             <div className="form-group">
-                <label className="form-label">Цена *</label>
+                <label className="form-label">Цена <span className="required">*</span></label>
                 <input type="number" name="price" value={part.price || ''} onChange={handleChange} className="form-input" required min="0.01" step="0.01" />
             </div>
 
@@ -304,7 +304,7 @@ const PartForm = () => {
             </div>
 
             <div className="form-group">
-                <label className="form-label">Тип продукции *</label>
+                <label className="form-label">Тип продукции <span className="required">*</span></label>
                 <select name="productTypeId" value={part.productTypeId || ''} onChange={handleChange} className="form-select" required>
                     <option value="">Выберите тип</option>
                     {productTypes.map(type => (
