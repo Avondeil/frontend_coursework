@@ -11,7 +11,6 @@ import Auth from './components/pages/Auth';
 import Registration from './components/pages/Registration';
 import Profile from './components/pages/Profile';
 import ProductCategorySelection from './components/pages/ProductCategorySelection';
-import Catalog from './components/pages/Catalog';
 import ProductPage from './components/pages/ProductPage';
 import CartPage from './components/pages/CartPage';
 import AutoParts from "./components/pages/AutoParts";
@@ -47,7 +46,6 @@ function App() {
                                 <Route path="/reset-password" element={<ResetPassword />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/catalog" element={<ProductCategorySelection />} />
-                                <Route path="/catalog/:category" element={<Catalog />} />
                                 <Route path="/product/:partId" element={<ProductPage />} />
                                 <Route path="/cart" element={<CartPage />} />
                                 <Route path="/autoparts" element={<AutoParts />} />
