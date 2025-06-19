@@ -5,7 +5,6 @@ import { API_BASE_URL } from '../../config';
 import { useCart } from '../contexts/CartContext'; // Хук для работы с корзиной
 import axios from 'axios';
 import { AddressSuggestions } from 'react-dadata';
-import 'react-dadata/dist/react-dadata.css';
 
 const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
     const [addressSuggestion, setAddressSuggestion] = useState(null);
@@ -91,11 +90,18 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
                     <label>
                         Адрес доставки <span className="required">*</span>
                     </label>
-                    <AddressSuggestions
-                        token={process.env.REACT_APP_DADATA_TOKEN}
-                        value={addressSuggestion}
-                        onChange={setAddressSuggestion}
-                    />
+                    <div className="input-wrapper">
+                        <AddressSuggestions
+                            token={process.env.REACT_APP_DADATA_TOKEN}
+                            value={addressSuggestion}
+                            onChange={setAddressSuggestion}
+                            inputProps={{
+                                className: 'react-dadata__input',
+                                placeholder: 'Введите адрес доставки',
+                                required: true,
+                            }}
+                        />
+                    </div>
                     <div className="auth-buttons">
                         <button type="submit" disabled={loading}>
                             {loading ? 'Оплата...' : 'Оплатить'}

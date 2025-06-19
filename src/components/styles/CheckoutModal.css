@@ -22,6 +22,7 @@
     text-align: center;
     animation: fadeIn 0.3s ease;
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .modal-content h2 {
@@ -39,7 +40,7 @@
     max-width: 580px;
     margin: 0 10px;
     box-sizing: border-box;
-    padding: 20px 20px;
+    padding: 20px 20px 40px;
 }
 
 .auth-form label {
@@ -134,8 +135,14 @@
     }
 
     .auth-form {
-        margin: 0 5px;
-        padding: 20px 5px;
+        margin: 0 auto;
+        padding: 20px 5px 40px;
+    }
+
+    .auth-form .input-wrapper {
+        margin-left: auto;
+        margin-right: auto;
+        width: calc(100% - 10px);
     }
 
     .auth-buttons {
@@ -147,6 +154,12 @@
         height: 40px;
         font-size: 0.85em;
     }
+
+    .react-dadata__suggestions {
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -155,14 +168,26 @@
     }
 
     .auth-form {
-        margin: 0 5px;
-        padding: 20px 5px;
+        margin: 0 auto;
+        padding: 20px 5px 40px;
+    }
+
+    .auth-form .input-wrapper {
+        margin-left: auto;
+        margin-right: auto;
+        width: calc(100% - 10px);
     }
 
     .auth-buttons button {
         height: 50px;
         font-size: 1em;
         padding: 10px;
+    }
+
+    .react-dadata__suggestions {
+        left: 0;
+        right: 0;
+        width: 100%;
     }
 }
 
@@ -175,4 +200,98 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.react-dadata__container {
+    position: relative;
+    width: 100%;
+}
+
+.react-dadata__input {
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    background: none;
+    color: #333;
+    display: block;
+}
+
+.react-dadata__input:focus {
+    border: none;
+    box-shadow: none;
+}
+
+.react-dadata__suggestions {
+    z-index: 1001;
+    text-align: left;
+    background-color: #fff;
+    border-radius: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    box-shadow: 0 1px 6px 3px rgba(0,0,0,.1);
+}
+
+.react-dadata__suggestion-note {
+    color: #828282;
+    padding: 10px 10px 5px;
+    font-size: 14px;
+}
+
+.react-dadata__suggestion {
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: left;
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 15px;
+    display: block;
+}
+
+.react-dadata__suggestion--line-through {
+    text-decoration: line-through;
+}
+
+.react-dadata__suggestion-subtitle {
+    color: #777;
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+.react-dadata__suggestion-subtitle-item {
+    margin-bottom: 4px;
+    margin-right: 16px;
+    display: inline-block;
+}
+
+.react-dadata__suggestion-subtitle-item:last-child {
+    margin-right: 0;
+}
+
+.react-dadata__suggestion--current {
+    background-color: rgba(0,124,214,.15);
+}
+
+.react-dadata__suggestion:hover {
+    background-color: rgba(0,124,214,.1);
+}
+
+.react-dadata mark {
+    background: none;
+}
+
+.react-dadata--highlighted {
+    color: #0094ff;
 }
