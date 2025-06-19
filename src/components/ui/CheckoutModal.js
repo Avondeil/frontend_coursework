@@ -4,22 +4,20 @@ import { useNotification } from "../contexts/NotificationContext";
 import { API_BASE_URL } from '../../config';
 import { useCart } from '../contexts/CartContext'; // Хук для работы с корзиной
 import axios from 'axios';
+import { AddressSuggestions } from 'react-dadata';
+import 'react-dadata/dist/react-dadata.css';
 
 const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
-    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [addressSuggestion, setAddressSuggestion] = useState(null);
     const [loading, setLoading] = useState(false);
     const { showNotification } = useNotification(); // Хук для уведомлений
     const { removeSelectedItems } = useCart(); // Получаем функцию для удаления только выбранных товаров
 
-    const handleAddressChange = (e) => {
-        setDeliveryAddress(e.target.value);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!deliveryAddress) {
-            showNotification({ type: 'error', message: 'Пожалуйста, введите адрес доставки.' });
+        if (!addressSuggestion) {
+            showNotification({ type: 'error', message: 'Пожалуйста, выберите корректный адрес из подсказок.' });
             return;
         }
 
@@ -39,7 +37,7 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
 
         // Формируем данные для отправки на сервер, используя только выбранные товары
         const orderRequest = {
-            deliveryAddress,
+            deliveryAddress: addressSuggestion.value,
             orderItems: selectedItems.map((item) => ({
                 partId: item.partId,
                 quantity: item.quantity,
@@ -93,17 +91,11 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
                     <label>
                         Адрес доставки <span className="required">*</span>
                     </label>
-                    <div className="input-wrapper">
-                        <input
-                            type="text"
-                            name="deliveryAddress"
-                            maxLength="320"
-                            placeholder="Введите адрес доставки"
-                            value={deliveryAddress}
-                            onChange={handleAddressChange}
-                            required
-                        />
-                    </div>
+                    <AddressSuggestions
+                        token={process.env.REACT_APP_DADATA_TOKEN}
+                        value={addressSuggestion}
+                        onChange={setAddressSuggestion}
+                    />
                     <div className="auth-buttons">
                         <button type="submit" disabled={loading}>
                             {loading ? 'Оплата...' : 'Оплатить'}
