@@ -34,6 +34,21 @@ export const CartProvider = ({ children }) => {
                     const response = await axios.get(`${API_BASE_URL}/Parts/${item.partId}`);
                     const product = response.data;
 
+                    // Проверка изменения наименования
+                    if (item.name !== product.name) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, name: product.name }
+                                : cartItem
+                        );
+                        hasChanges = true;
+                        showNotification({
+                            type: 'info',
+                            message: `Название товара "${item.name}" изменено на "${product.name}".`,
+                        });
+                    }
+
+                    // Проверка изменения цены
                     if (item.price !== product.price) {
                         updatedCart = updatedCart.map((cartItem) =>
                             cartItem.partId === item.partId
@@ -43,38 +58,43 @@ export const CartProvider = ({ children }) => {
                         hasChanges = true;
                         showNotification({
                             type: 'info',
-                            message: `Цена товара "${item.name}" обновлена до ${product.price} руб.`,
+                            message: `Цена товара "${product.name}" обновлена до ${product.price} руб.`,
                         });
                     }
 
+                    // Проверка изменения количества
+                    if (item.stockQuantity !== product.stockQuantity) {
+                        updatedCart = updatedCart.map((cartItem) =>
+                            cartItem.partId === item.partId
+                                ? { ...cartItem, stockQuantity: product.stockQuantity }
+                                : cartItem
+                        );
+                        hasChanges = true;
+                    }
+
+                    // Проверка наличия/отсутствия товара
                     if (product.stockQuantity <= 0 && item.stockQuantity > 0) {
                         updatedCart = updatedCart.map((cartItem) =>
                             cartItem.partId === item.partId
-                                ? { ...cartItem, stockQuantity: 0, isSelected: false, price: product.price }
+                                ? { ...cartItem, stockQuantity: 0, isSelected: false }
                                 : cartItem
                         );
                         hasChanges = true;
                         showNotification({
                             type: 'error',
-                            message: `Товар "${item.name}" стал недоступен и исключён из оформления.`,
+                            message: `Товар "${product.name}" стал недоступен и исключён из оформления.`,
                         });
                     } else if (product.stockQuantity > 0 && item.stockQuantity <= 0) {
                         updatedCart = updatedCart.map((cartItem) =>
                             cartItem.partId === item.partId
-                                ? { ...cartItem, stockQuantity: product.stockQuantity, isSelected: true, price: product.price }
+                                ? { ...cartItem, stockQuantity: product.stockQuantity, isSelected: true }
                                 : cartItem
                         );
                         hasChanges = true;
                         showNotification({
                             type: 'success',
-                            message: `Товар "${item.name}" снова в наличии и выбран для оформления.`,
+                            message: `Товар "${product.name}" снова в наличии и выбран для оформления.`,
                         });
-                    } else if (product.stockQuantity > 0) {
-                        updatedCart = updatedCart.map((cartItem) =>
-                            cartItem.partId === item.partId
-                                ? { ...cartItem, stockQuantity: product.stockQuantity, price: product.price }
-                                : cartItem
-                        );
                     }
                 } catch (error) {
                     console.error(`Ошибка проверки товара ${item.partId}:`, error);
