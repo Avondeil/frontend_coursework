@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import '../styles/CheckoutModal.css';
 import { useNotification } from "../contexts/NotificationContext";
 import { API_BASE_URL } from '../../config';
-import { useCart } from '../contexts/CartContext'; // Хук для работы с корзиной
+import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import { AddressSuggestions } from 'react-dadata';
 
 const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
     const [addressSuggestion, setAddressSuggestion] = useState(null);
     const [loading, setLoading] = useState(false);
-    const { showNotification } = useNotification(); // Хук для уведомлений
-    const { removeSelectedItems } = useCart(); // Получаем функцию для удаления только выбранных товаров
+    const { showNotification } = useNotification();
+    const { removeSelectedItems } = useCart();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,7 +25,7 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
             return;
         }
 
-        setLoading(true); // Включаем индикатор загрузки
+        setLoading(true);
 
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) {
@@ -34,39 +34,47 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
             return;
         }
 
-        // Формируем данные для отправки на сервер, используя только выбранные товары
-        const orderRequest = {
-            deliveryAddress: addressSuggestion.value,
-            orderItems: selectedItems.map((item) => ({
-                partId: item.partId,
-                quantity: item.quantity,
-                price: item.price,
-            })),
-        };
-
         try {
-            const response = await axios.post(`${API_BASE_URL}/order/create`, orderRequest, {
+            // Сохраняем selectedItems в localStorage
+            localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+
+            const response = await axios.post(`${API_BASE_URL}/order/create-payment`, {
+                deliveryAddress: addressSuggestion.value,
+                orderItems: selectedItems.map((item) => ({
+                    PartId: item.partId,
+                    Quantity: item.quantity
+                }))
+            }, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
 
-            // Если ответ успешен, показываем сообщение и удаляем только выбранные товары
-            showNotification({ type: 'success', message: response.data.message || 'Заказ успешно оформлен!' });
-            removeSelectedItems(); // Удаляем только выбранные товары из корзины
-            onClose(); // Закрываем модальное окно после успешного оформления
+            console.log('Ответ от сервера:', response.data);
+            const { paymentId, confirmationUrl } = response.data;
+
+            console.log('confirmationUrl:', confirmationUrl);
+            if (!confirmationUrl) {
+                showNotification({ type: 'error', message: 'Не удалось получить URL для оплаты.' });
+                setLoading(false);
+                return;
+            }
+
+            localStorage.setItem('currentPaymentId', paymentId);
+
+            window.location.href = confirmationUrl;
+
         } catch (err) {
-            // Обработка ошибок
             if (err.response && err.response.status === 401) {
                 showNotification({ type: 'error', message: 'Ошибка 401: Неавторизован. Проверьте токен.' });
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('token');
             } else {
-                showNotification({ type: 'error', message: `Ошибка при выполнении запроса: ${err.message}` });
+                showNotification({ type: 'error', message: `Ошибка при выполнении запроса: ${err.response?.data || err.message}` });
             }
         } finally {
-            setLoading(false); // Завершаем загрузку
+            setLoading(false);
         }
     };
 
@@ -80,7 +88,7 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
         return () => document.body.classList.remove('no-scroll');
     }, [isOpen]);
 
-    if (!isOpen) return null; // Если модальное окно закрыто, ничего не рендерим
+    if (!isOpen) return null;
 
     return (
         <div className="modal-overlay">
@@ -104,7 +112,7 @@ const CheckoutModal = ({ isOpen, onClose, selectedItems }) => {
                     </div>
                     <div className="auth-buttons">
                         <button type="submit" disabled={loading}>
-                            {loading ? 'Оплата...' : 'Оплатить'}
+                            {loading ? 'Перенаправление...' : 'Оплатить'}
                         </button>
                     </div>
                     <button type="button" onClick={onClose} className="close-btn">Закрыть</button>

@@ -22,6 +22,7 @@ import ScrollToTop from './components/ui/ScrollToTop';
 import PartForm from "./components/pages/PartForm";
 import { ComparisonProvider } from './components/contexts/ComparisonContext';
 import ComparePage from "./components/pages/ComparePage";
+import PaymentSuccess from './components/ui/PaymentSuccess';
 
 function App() {
     return (
@@ -53,6 +54,7 @@ function App() {
                                 <Route path="/add-part" element={<PartForm />} />
                                 <Route path="/edit-part/:partId" element={<PartForm />} />
                                 <Route path="/compare" element={<ComparePage />} />
+                                <Route path="/cart/payment-success" element={<PaymentSuccess />} />
                             </Routes>
                             <Footer />
                         </Router>
